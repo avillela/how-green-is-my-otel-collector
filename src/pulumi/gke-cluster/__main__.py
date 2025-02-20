@@ -39,6 +39,7 @@ k8s_cluster = Cluster(
     deletion_protection=False,
     initial_node_count=NODE_COUNT,
     node_version=ENGINE_VERSION,
+    location=zone,
     min_master_version=ENGINE_VERSION,
     node_config=ClusterNodeConfigArgs(
         machine_type=NODE_MACHINE_TYPE,
@@ -56,15 +57,16 @@ node_pool = NodePool(
     cluster=k8s_cluster.name,
     initial_node_count=NODE_COUNT,
     location=zone,
-    node_config={
-        "machine_type": NODE_MACHINE_TYPE,
-        "imageType": IMAGE_TYPE,
-        "diskType": DISK_TYPE,
-        "disk_size_gb": DISK_SIZE_GB,
-        "oauth_scopes": [
+    node_config=ClusterNodeConfigArgs(
+        machine_type=NODE_MACHINE_TYPE,
+        image_type=IMAGE_TYPE,
+        disk_type=DISK_TYPE,
+        disk_size_gb=DISK_SIZE_GB,
+        oauth_scopes=[
             "https://www.googleapis.com/auth/cloud-platform",
         ],
-    })
+    ),
+)
 
 # Manufacture a GKE-style Kubeconfig. Note that this is slightly "different" because of the way GKE requires
 # gcloud to be in the picture for cluster authentication (rather than using the client cert/key directly).

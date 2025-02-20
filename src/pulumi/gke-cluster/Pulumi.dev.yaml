@@ -1,7 +1,7 @@
 config:
   gcp:project: indycomp0t1
   gcp:region: us-east1
-  gcp:zone: us-east1-b
+  gcp:zone: us-east1-c
 
   kepler-gke-cluster:cluster_name: pulumi-gke
   kepler-gke-cluster:disk_size_gb: "30"
