@@ -1,0 +1,11 @@
+config:
+  gcp:project: indycomp0t1
+  gcp:region: us-east1
+  gcp:zone: us-east1-b
+
+  kepler-gke-cluster:cluster_name: pulumi-gke
+  kepler-gke-cluster:disk_size_gb: "30"
+  kepler-gke-cluster:disk_type: pd-standard
+  kepler-gke-cluster:image_type: cos_containerd
+  kepler-gke-cluster:node_count: "1"
+  kepler-gke-cluster:node_machine_type: n1-standard-4
