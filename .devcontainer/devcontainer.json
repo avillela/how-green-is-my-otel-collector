@@ -6,6 +6,7 @@
       "ghcr.io/devcontainers-extra/features/kubectl-asdf:2": {},
       "ghcr.io/dhoeric/features/k9s:1": {},
       "ghcr.io/flexwie/devcontainer-features/pulumi:1": {},
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     },
     "overrideFeatureInstallOrder": [
         "ghcr.io/devcontainers-extra/features/kubectl-asdf",
