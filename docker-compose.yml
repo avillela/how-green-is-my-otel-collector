@@ -20,7 +20,7 @@ services:
         context: ${CONTEXT}
         dockerfile: Dockerfile.client
         tags:
-          - ghcr.io/avillela/${IMAGE_NAME}:${IMAGE_VERSION}-py-otel-client
+          - ${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_VERSION}-py-otel-client
         x-bake:
           platforms:
             - linux/amd64
@@ -43,7 +43,7 @@ services:
         context: ${CONTEXT}
         dockerfile: Dockerfile.server
         tags:
-          - ghcr.io/avillela/${IMAGE_NAME}:${IMAGE_VERSION}-py-otel-server
+          - ${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_VERSION}-py-otel-server
         x-bake:
           platforms:
             - linux/amd64
@@ -71,7 +71,7 @@ services:
       context: ${CONTEXT}
       dockerfile: Dockerfile.app
       tags:
-        - ghcr.io/avillela/${IMAGE_NAME}:${IMAGE_VERSION}-py-prometheus-app
+        - ${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_VERSION}-py-prometheus-app
       x-bake:
         platforms:
           - linux/amd64

@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: py-otel-server
-        image: otel-target-allocator-talk:0.1.0-py-otel-server
+        image: ghcr.io/avillela/green-collector:0.1.0-py-otel-server
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8082

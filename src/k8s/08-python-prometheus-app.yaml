@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: my-app
-          image: otel-target-allocator-talk:0.1.0-py-prometheus-app
+          image: ghcr.io/avillela/green-collector:0.1.0-py-prometheus-app
           imagePullPolicy: IfNotPresent
           ports:
             - name: prom

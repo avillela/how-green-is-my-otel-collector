@@ -10,16 +10,12 @@
 # README: https://github.com/henrikrexed/Sustainability-workshop/blob/master/README.md
 # https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
 
-echo "*********** Installing kube-prometheus-stack operator *********** "
+echo "*********** Installing kube-prometheus-stack *********** "
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack   \
   --namespace prometheus --create-namespace \
   --set alertmanager.enabled=false  --wait
 
-# Instructions for port-forwarding
-# export POD_NAME=$(kubectl --namespace prometheus get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=prometheus" -oname)
-# kubectl --namespace prometheus port-forward $POD_NAME 3000
-# Grafana default username and password: admin/prom-operator
 
 echo "*********** Deploying Kepler *********** "
 helm repo add kepler https://sustainable-computing-io.github.io/kepler-helm-chart

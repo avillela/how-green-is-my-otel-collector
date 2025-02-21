@@ -26,7 +26,7 @@ docker compose up
 
 ### Start OTel Collector
 
-```
+```bash
 docker run -it --rm -p 4317:4317 -p 4318:4318 \
     -v $(pwd)/src/otelcollector/otelcol-config.yml:/etc/otelcol-config.yml \
     -v $(pwd)/src/otelcollector/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml \
@@ -38,7 +38,7 @@ docker run -it --rm -p 4317:4317 -p 4318:4318 \
 
 Start server by opening up a new terminal window:
 
-```
+```bash
 # Version 1: use Python log auto-instrumentation
 source src/python/venv/bin/activate
 export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
@@ -65,7 +65,7 @@ opentelemetry-instrument \
 
 Start up client in a new terminal window:
 
-```
+```bash
 source src/python/venv/bin/activate
 opentelemetry-instrument \
     --traces_exporter console,otlp \
