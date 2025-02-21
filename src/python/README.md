@@ -1,77 +1,24 @@
-# Python OTel Example README
+# Python OTel App
 
-## Setup
+This Python app is made up of a:
+* Client
+* Server
+* Metrics-emitting app
 
-```bash
-python3 -m venv src/python/venv
-source src/python/venv/bin/activate
+The client requests the `/rolldice` endpoint at http://localhost:8082/rolldice. The endpoint is Python Flask server that rolls a virtual die and outputs a number between 1 and 6.
 
-pip install --upgrade pip
+This app emits OTel traces via a combination of [code-based](https://opentelemetry.io/docs/concepts/instrumentation/code-based/) and [zero-code](https://opentelemetry.io/docs/concepts/instrumentation/zero-code/) instrumentation. 
 
-# Installs dependencies
-pip install -r src/python/requirements.txt
-opentelemetry-bootstrap -a install
-```
+The app also emits metrics, and some logs (code-based). The logs are emitted via Python logs auto-instrumentation and the logs bridge API.
 
-## Docker Compose
+![python client server app architecture](/images/otel-python-client-server-app.png)
 
-```bash
-docker compose build
-docker compose up
-```
+The metrics-emitting app is independent of the client and server app. All it does is emitt Prometheus-style metrics which are ingested via the [OTel Collector](https://opentelemetry.io/docs/collector/), aided by the [Target Allocator](https://opentelemetry.io/docs/platforms/kubernetes/operator/target-allocator/).
 
->**NOTE:** Use `--no-cache` to build without cached layers.
+![python prometheus metrics app](/images/otel-python-prometheus-app.png)
 
-## Without Docker Compose
-
-### Start OTel Collector
-
-```bash
-docker run -it --rm -p 4317:4317 -p 4318:4318 \
-    -v $(pwd)/src/otelcollector/otelcol-config.yml:/etc/otelcol-config.yml \
-    -v $(pwd)/src/otelcollector/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml \
-    --name otelcol otel/opentelemetry-collector-contrib:0.93.0  \
-    "--config=/etc/otelcol-config.yml" "--config=/etc/otelcol-config-extras.yml"
-```
-
-### Start the Services
-
-Start server by opening up a new terminal window:
-
-```bash
-# Version 1: use Python log auto-instrumentation
-source src/python/venv/bin/activate
-export OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
-export OTEL_PYTHON_LOG_CORRELATION=true
-export OTEL_PYTHON_LOG_LEVEL=debug
-opentelemetry-instrument \
-    --traces_exporter console,otlp \
-    --metrics_exporter console,otlp \
-    --logs_exporter console,otlp \
-    --service_name test-py-server \
-    python src/python/server.py
-
-
-# Version 2: Don't use Python log auto-instrumentation. This doesn't seem to cannibalize log INFO messages
-source src/python/venv/bin/activate
-export OTEL_PYTHON_LOG_CORRELATION=true
-opentelemetry-instrument \
-    --traces_exporter console,otlp \
-    --metrics_exporter console,otlp \
-    --logs_exporter console,otlp \
-    --service_name test-py-server \
-    python src/python/server2.py
-```
-
-Start up client in a new terminal window:
-
-```bash
-source src/python/venv/bin/activate
-opentelemetry-instrument \
-    --traces_exporter console,otlp \
-    --metrics_exporter console,otlp \
-    --logs_exporter console,otlp \
-    --service_name test-py-client \
-    python src/python/client.py
-```
-
+For more information, check out these articles:
+* [Prometheus & OpenTelemetry: Better Together](https://adri-v.medium.com/prometheus-opentelemetry-better-together-41dc637f2292)
+* [Dude, Where's My Error](https://adri-v.medium.com/dude-wheres-my-error-52dc52b25909)
+* [Tips for Troubleshooting the Target Allocator](https://adri-v.medium.com/tips-for-troubleshooting-the-target-allocator-de9eca2b78b4)
+* [Things You Might Not Have Known About the OpenTelemetry Operator](https://medium.com/dzerolabs/otel-operator-q-a-81d63addbf92)
