@@ -59,22 +59,6 @@ k8s_cluster = Cluster(
     ),
 )
 
-# node_pool = NodePool(
-#     resource_name=NODE_POOL_NAME,
-#     cluster=k8s_cluster.name,
-#     initial_node_count=NODE_COUNT,
-#     location=zone,
-#     node_config=ClusterNodeConfigArgs(
-#         machine_type=NODE_MACHINE_TYPE,
-#         image_type=IMAGE_TYPE,
-#         disk_type=DISK_TYPE,
-#         disk_size_gb=DISK_SIZE_GB,
-#         oauth_scopes=[
-#             "https://www.googleapis.com/auth/cloud-platform",
-#         ],
-#     ),
-# )
-
 # Manufacture a GKE-style Kubeconfig. Note that this is slightly "different" because of the way GKE requires
 # gcloud to be in the picture for cluster authentication (rather than using the client cert/key directly).
 k8s_info = Output.all(k8s_cluster.name, k8s_cluster.endpoint, k8s_cluster.master_auth)

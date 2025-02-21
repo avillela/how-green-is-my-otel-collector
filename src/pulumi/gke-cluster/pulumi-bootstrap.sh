@@ -14,18 +14,12 @@ if [ -z "${GCP_PROJECT_NAME}" ] || [ -z "${GCP_REGION}" ] || [ -z "${GCP_ZONE}" 
     exit 1
 fi
 
+gcloud auth login
 gcloud config set project ${GCP_PROJECT_NAME}
 gcloud auth application-default login
 
-# Python venv setup
-pip install virtualenv
-virtualenv venv
-source  venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-
 # Pulumi setup
-pulumi new gcp-python \
+pulumi new https://github.com/avillela/how-green-is-my-otel-collector \
     -n kepler-gke-cluster \
     -s dev \
     -d "Provision a GKE cluster" -y --force

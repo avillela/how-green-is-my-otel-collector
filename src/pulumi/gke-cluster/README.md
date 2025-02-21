@@ -1,95 +1,55 @@
 # Use Pulumi Python SDK to Create a Kubernetes Cluster in Google Cloud
 
-1- gCloud authentication
+1- Google Cloud authentication
 
-Log into GCP
+Log into Google Cloud and set the project name
 
 ```bash
+gcloud auth login
 gcloud config set project <your_project_name>
 gcloud auth application-default login
 ```
 
-Make sure that the [Kubernetes Engine API is enabled](https://console.cloud.google.com/apis/api/container.googleapis.com) for your project.
-
-Make sure that `gke-gcloud-auth-plugin` is enabled. To enable it, run:
+2- Navigate to the Pulumi directory
 
 ```bash
-sudo apt-get install google-cloud-cli-gke-gcloud-auth-plugin
-gcloud auth login
-```
-
-2- Set up Python with Pulumi
-
-```bash
-cd src/pulumi/gke-cluster-example
-
-# Set up virtualenv
-pip install virtualenv
-virtualenv venv
-source  venv/bin/activate
-python -m pip install --upgrade pip
-
-# Install requirements Pulumi + GCP + GKE
-pip install -r requirements.txt
+cd src/pulumi/gke-cluster
 ```
 
 3- Initialize Pulumi
 
-This example assumes that you're using app.pulumi.com to store your stack. As a pre-requisite, you'll get set up [here](https://app.pulumi.com/). The service is free for personal use.
+This example assumes that your stack is located in [app.pulumi.com](https://app.pulumi.com). As a pre-requisite, you'll get set up an account [here](https://app.pulumi.com/). The service is free for personal use.
+
+Create a new Pulumi project under your account. This is done one-time only. This will overwrite everything in this directiory, which is fine, because we haven't made any changes to the code.
 
 ```bash
-# One-time only
-pulumi stack init dev
+pulumi new https://github.com/avillela/how-green-is-my-otel-collector \
+    -n kepler-gke-cluster \
+    -s dev \
+    -d "Provision a GKE cluster" -y --force
 ```
 
-Additional commands
-
-Fully-qualified stackname: https://app.pulumi.com/<user_id>/<project_name>/<stack_name>
+Initialize and select the `dev` stack.
 
 ```bash
-# Select stack
-pulumi stack select <stackname>
-
-# Use delete stack
-pulumi stack rm <stackname> -f
-
-# List stacks
-pulumi stack ls
+pulumi stack select dev
 ```
 
-4- Configure GCP project in Pulumi
+Fully-qualified stackname: https://app.pulumi.com/<your_pulumi_username>/kepler-gke-cluster/dev
 
-This configuration is one-time only.
-
-```bash
-pulumi config set gcp:project <your_project_name>
-pulumi config set gcp:region <region>
-pulumi config set gcp:zone <zone>
-```
-
-Find compute zones and regions
+4- Provision infrastructure
 
 ```bash
-gcloud compute zones list
-```
-
-
-5- Provision infrastructure
-
-```bash
-# When starting a new session
-pulumi stack select <stackname>
-
-# Run plan
-pulumi up -y
-
 # Preview changes
 pulumi preview
 
-# Destroy infrastructure
-pulumi destroy
+# Run plan
+pulumi up -y
+```
 
-# Destroy the stack
-pulumi stack rm
+To destroy your infrastructure, run:
+
+```bash
+pulumi destroy -y
 ```
 
