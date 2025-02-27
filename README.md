@@ -126,3 +126,68 @@ Go to Grafana at http://localhost:3000, and naviagate to `Dashboards > Kepler Ex
 Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power consumption and carbon emissions of your Collector.
 
 ![otel collector kepler dashboard](/images/otel-collector-consumption.png)
+
+
+## Note from Henrik
+
+# k8s transform processor configuration
+
+Exammple [here](https://raw.githubusercontent.com/Dynatrace/snippets/master/technologies/open-telemetry/open-telemetry-demo-application-dashboard/otel-demo-helm-values.yaml)
+
+Snippet:
+
+```yaml
+processors:
+  transform:
+    error_mode: ignore
+    metric_statements:
+      - context: resource
+        statements:
+            - set(attributes["k8s.container.name"], attributes["container_name"]) where attributes["container_name"] != nil
+            - set(attributes["k8s.pod.name"], attributes["pod_name"]) where attributes["pod_name"] != nil
+            - set(attributes["k8s.namespace.name"], attributes["container_namespace"]) where attributes["container_namespace"] != nil
+```
+
+The above allows us to re-use existing vars in Grafana (standardized semantics) -> need to ask Henrik again
+
+# Enable process metrics
+
+This value in `values.yaml` collects metrics on individual processes, and as a result, increases metrics cardinality:
+`ENABLE_PROCESS_METRICS: "true"`
+https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/0f64c162971740204fc932b6bcf604e1c6615b41/kepler/values.yaml#L61
+
+
+More on Kepler configuration [here](https://sustainable-computing.io/usage/general_config/).
+
+To reduce metrics cardinality, add [this scrape config](https://github.com/henrikrexed/Sustainability-workshop/blob/9408e93dcb6b2bd892f9e0c1e13c0eb9caaa507d/opentelemetry/openTelemetry-manifest_statefulset.yaml#L83-L86
+) to Prometheus receiver
+
+Dynatrace dashboard [here](https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/master/dynatrace/Kepler%20Energy%20usage.json
+). Try to create Grafana equivalent.
+
+Bonus: Aether project gives you more specific metrics for cloud provider: 
+- https://github.com/re-cinq/aether-kepler-source
+- https://github.com/re-cinq/aether
+
+Henrik's sustainability tips:
+1. Measure - if you don't know wha tyou're measuring you can't improve
+           - include energy consumption as main KPI on your CI/CD pipelines
+2. Optimize - pick and choose right locaiton for workload
+3. Profiling
+4. Optimize on resource allocation
+5. KubeGreen to shut down collectors on test envs
+
+** Instead of doing big things, use smaller things (e.g smaller collectors instead of giant one)
+** Some languages are more environmentally unfriendly than others (e.g. Python consumes a lot of energy). See stats [here](https://softjourn.com/insights/environmentally-friendly-programming-languages).
+
+
+## Additional crap
+
+This shows the energy calculation done by Keptn (maybe we can retool this for Grafana).
+
+`(sum(kepler_container_joules_total{pod_name=~"{{.pod}}.*",container_namespace="{{.ns}}"})/sum(kepler_container_joules_total{container_namespace="{{.ns}}"}))*100'`
+
+
+Reference repos from Henrik:
+- https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
+- https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/master/deployment.sh
