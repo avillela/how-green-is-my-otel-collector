@@ -70,7 +70,7 @@ Deploying the Operator:
 
 ### 5- Build and publish images to image registry (Optional)
 
-If you would like to build container images of the example Python code yourself and deploy it to your own container registry, you are more than welcome to do so.
+If you would like to build container images of the example Python code yourself and deploy it to your own container registry, you are more than welcome to do so. Otherwise, feel free to skip this step and pull the images from my registry. 😁
 
 The script in this section publishes the container images to the [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
 
@@ -105,6 +105,12 @@ Tail OTel Collector logs:
 kubectl logs -l app.kubernetes.io/component=opentelemetry-collector -n opentelemetry --follow
 ```
 
+List metrics (mostly):
+
+```bash
+kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
+```
+
 ### 7- View the traces in Jaeger
 
 First, open up a new terminal window, and set up port-forwrading.
@@ -128,6 +134,18 @@ Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power co
 ![otel collector kepler dashboard](/images/otel-collector-consumption.png)
 
 
+## Nukify
+
+Nukify resoruces from the Kubernetes cluster without nukifying the cluster itself.
+
+```bash
+# Uninstall Kepler
+helm delete kepler --namespace kepler
+
+# Uninstall Kube Prometheus Stack
+helm delete prometheus --namespace prometheus
+```
+
 ## Note from Henrik
 
 # k8s transform processor configuration
@@ -148,7 +166,7 @@ processors:
             - set(attributes["k8s.namespace.name"], attributes["container_namespace"]) where attributes["container_namespace"] != nil
 ```
 
-The above allows us to re-use existing vars in Grafana (standardized semantics) -> need to ask Henrik again
+The above allows us to re-use existing vars in Grafana (standardized semantics) -> need to ask Henrik again what this means
 
 # Enable process metrics
 

@@ -1,0 +1,1112 @@
+{
+    "version": 17,
+    "variables": [
+        {
+            "key": "namespace",
+            "type": "query",
+            "input": "fetch logs\n|summarize count() , by: {k8s.namespace.name}\n| fieldsKeep k8s.namespace.name\n",
+            "multiple": false,
+            "visible": true
+        },
+        {
+            "key": "podname",
+            "type": "query",
+            "visible": true,
+            "input": "fetch logs\n|summarize count() , by: {k8s.pod.name}\n| fieldsKeep k8s.pod.name",
+            "multiple": false
+        }
+    ],
+    "tiles": {
+        "0": {
+            "type": "data",
+            "title": "CO2 Coal per namespace",
+            "query": "timeseries joul=sum(kepler_container_joules_total),by:{container_namespace},interval:1h, from:-24h\n| fieldsAdd co2Coal=joul[]* 0.000000277777777777778*2.23 \n| fieldsRemove joul",
+            "visualization": "areaChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute"
+                    },
+                    "categoryOverrides": {},
+                    "truncationMode": "middle",
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "container_namespace"
+                        ],
+                        "categoryAxisLabel": "container_namespace",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "co2Coal"
+                        ],
+                        "leftAxisDimensions": [
+                            "container_namespace"
+                        ]
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "leftYAxisSettings": {}
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "container_namespace",
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "recordField": "container_namespace",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": true
+                    },
+                    "sparklineSettings": {
+                        "record": "co2Coal"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "co2Coal"
+                            ],
+                            "value": "sparkline",
+                            "id": 1739170434152
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "container_namespace"
+                    ],
+                    "dataMappings": {
+                        "value": "interval"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "blue"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": []
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "dimension": "interval",
+                    "displayedFields": [],
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "co2Coal"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "1": {
+            "type": "data",
+            "title": "CO2 Petroleum per namespace",
+            "query": "timeseries joul=sum(kepler_container_joules_total),by:{container_namespace},interval:1h, from:-24h\n| fieldsAdd co2Coal=joul[]* 0.000000277777777777778*2.13 \n| fieldsRemove joul",
+            "visualization": "areaChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute"
+                    },
+                    "categoryOverrides": {},
+                    "truncationMode": "middle",
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "container_namespace"
+                        ],
+                        "categoryAxisLabel": "container_namespace",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "co2Coal"
+                        ],
+                        "leftAxisDimensions": [
+                            "container_namespace"
+                        ]
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "leftYAxisSettings": {}
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "container_namespace",
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "recordField": "container_namespace",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": true
+                    },
+                    "sparklineSettings": {
+                        "record": "co2Coal"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "co2Coal"
+                            ],
+                            "value": "sparkline",
+                            "id": 1739170434137
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "container_namespace"
+                    ],
+                    "dataMappings": {
+                        "value": "interval"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "blue"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": []
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "dimension": "interval",
+                    "displayedFields": [],
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "co2Coal"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "2": {
+            "type": "data",
+            "title": "CO2 Coal per namespace",
+            "query": "timeseries joul=sum(kepler_container_joules_total),by:{container_namespace},interval:1h, from:-24h\n| fieldsAdd co2Coal=joul[]* 0.000000277777777777778*0.91\n| fieldsRemove joul",
+            "visualization": "areaChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute"
+                    },
+                    "categoryOverrides": {},
+                    "truncationMode": "middle",
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "container_namespace"
+                        ],
+                        "categoryAxisLabel": "container_namespace",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "co2Coal"
+                        ],
+                        "leftAxisDimensions": [
+                            "container_namespace"
+                        ]
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "leftYAxisSettings": {}
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "container_namespace",
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "recordField": "container_namespace",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": true
+                    },
+                    "sparklineSettings": {
+                        "record": "co2Coal"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "co2Coal"
+                            ],
+                            "value": "sparkline",
+                            "id": 1739170434072
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "container_namespace"
+                    ],
+                    "dataMappings": {
+                        "value": "interval"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "blue"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": []
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "dimension": "interval",
+                    "displayedFields": [],
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "co2Coal"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "3": {
+            "type": "data",
+            "title": "Power Consumption (PKG+DRAM) / min for Top 10 Namespaces (kWh per hour)",
+            "query": "timeseries {pkg=sum(kepler_container_package_joules_total), dram=sum(kepler_container_dram_joules_total)}, by:{k8s.namespace.name}\n| fieldsAdd kwhusage= (pkg[]* 0.000000277777777777778)+(dram[]* 0.000000277777777777778)\n| fieldsRemove pkg,dram\n| fieldsAdd kwhusagePers=kwhusage[]/todouble(interval/1m) ",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "k8s.namespace.name"
+                        ],
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "k8s.namespace.name",
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "kwhusage",
+                            "kwhusagePers"
+                        ]
+                    },
+                    "truncationMode": "middle",
+                    "bandChartSettings": {
+                        "lower": "kwhusage",
+                        "upper": "kwhusagePers"
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "k8sspace.name",
+                        "interval"
+                    ],
+                    "leftYAxisSettings": {}
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": false
+                    },
+                    "recordField": "k8s.namespace.name",
+                    "label": "k8s.namespace.name",
+                    "sparklineSettings": {
+                        "record": "kwhusagePers"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "kwhusage",
+                                "kwhusagePers"
+                            ],
+                            "value": "sparkline",
+                            "id": 1740067451946
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "k8s.namespace.name"
+                    ],
+                    "dataMappings": {
+                        "value": "k8s.namespace.name"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": [
+                        "k8s.namespace.name"
+                    ]
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "displayedFields": [
+                        "k8s.namespace.name"
+                    ],
+                    "dimension": "interval",
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "kwhusage",
+                    "longitudeList": "kwhusagePers"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "4": {
+            "type": "data",
+            "title": "Power consumption in Joule per min per Namespace",
+            "query": "  timeseries sum(kepler_container_joules_total) , alias:joulusage,by:{k8s.namespace.name}\n  | fieldsAdd totalpers=joulusage[]/todouble(interval/1m) ",
+            "visualization": "barChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "truncationMode": "middle",
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "k8s.namespace.name"
+                        ],
+                        "categoryAxisLabel": "k8s.namespace.name",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "bandChartSettings": {
+                        "lower": "joulusage",
+                        "upper": "totalpers"
+                    },
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "joulusage",
+                            "totalpers"
+                        ]
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "leftYAxisSettings": {}
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "container_namespace",
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "recordField": "container_namespace",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": true
+                    },
+                    "sparklineSettings": {
+                        "record": "totalpers"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "joulusage",
+                                "totalpers"
+                            ],
+                            "value": "sparkline",
+                            "id": 1736257114110
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "k8s.namespace.name"
+                    ],
+                    "dataMappings": {
+                        "value": "k8s.namespace.name"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": [
+                        "k8s.namespace.name"
+                    ]
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "dimension": "interval",
+                    "displayedFields": [
+                        "k8s.namespace.name"
+                    ],
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "joulusage",
+                    "longitudeList": "totalpers"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "5": {
+            "type": "data",
+            "title": "Power consumption in Joule per Pod",
+            "query": "  timeseries sum(kepler_container_joules_total) , alias:joulusage,by:{k8s.pod.name},filter: {k8s.namespace.name == $namespace}\n  | fieldsAdd totalpers=joulusage[]/todouble(interval/1m) ",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "truncationMode": "middle",
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "k8s.pod.name"
+                        ],
+                        "categoryAxisLabel": "k8s.pod.name",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "joulusage",
+                            "totalpers"
+                        ]
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "leftYAxisSettings": {},
+                    "bandChartSettings": {
+                        "lower": "joulusage",
+                        "upper": "totalpers"
+                    }
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "pod_name",
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "recordField": "pod_name",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": true
+                    },
+                    "sparklineSettings": {
+                        "record": "totalpers"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "joulusage",
+                                "totalpers"
+                            ],
+                            "value": "sparkline",
+                            "id": 1739201027387
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "k8s.pod.name"
+                    ],
+                    "dataMappings": {
+                        "value": "k8s.pod.name"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": [
+                        "k8s.pod.name"
+                    ]
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "displayedFields": [
+                        "k8s.pod.name"
+                    ],
+                    "dimension": "interval",
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "joulusage",
+                    "longitudeList": "totalpers"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "6": {
+            "type": "data",
+            "title": "Power consumption in Joule per Pod",
+            "query": "  timeseries sum(kepler_container_joules_total) , alias:joulusage,by:{k8s.container.name,command},filter: {k8s.pod.name == $podname}\n  | fieldsAdd totalpers=joulusage[]/todouble(interval/1m) ",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
+                    "gapPolicy": "connect",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "absolute"
+                    },
+                    "categoryOverrides": {},
+                    "truncationMode": "middle",
+                    "categoricalBarChartSettings": {
+                        "categoryAxis": [
+                            "container_name"
+                        ],
+                        "categoryAxisLabel": "container_name",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "valueRepresentation": "absolute",
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "joulusage",
+                            "totalpers"
+                        ],
+                        "leftAxisDimensions": [
+                            "container_name"
+                        ]
+                    },
+                    "bandChartSettings": {
+                        "lower": "joulusage",
+                        "upper": "totalpers"
+                    },
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "leftYAxisSettings": {}
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "container_name",
+                    "prefixIcon": "",
+                    "autoscale": true,
+                    "alignment": "center",
+                    "recordField": "container_name",
+                    "trend": {
+                        "trendType": "auto",
+                        "isVisible": false
+                    },
+                    "sparklineSettings": {
+                        "record": "totalpers"
+                    }
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "lineWrapIds": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "joulusage",
+                                "totalpers"
+                            ],
+                            "value": "sparkline",
+                            "id": 1739201068262
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto"
+                    },
+                    "displayedFields": [
+                        "container_name"
+                    ],
+                    "dataMappings": {
+                        "value": "interval"
+                    },
+                    "colorMode": "color-palette",
+                    "colorPalette": "blue"
+                },
+                "histogram": {
+                    "legend": "auto",
+                    "yAxis": {
+                        "label": "Frequency",
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "displayedFields": [
+                        "k8s.container.name"
+                    ]
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "label": {
+                    "showLabel": false,
+                    "label": "interval"
+                },
+                "icon": {
+                    "showIcon": false,
+                    "icon": ""
+                },
+                "dataMapping": {
+                    "dimension": "interval",
+                    "displayedFields": [
+                        "k8s.container.name"
+                    ],
+                    "value": "interval",
+                    "longitude": "interval",
+                    "latitudeList": "joulusage",
+                    "longitudeList": "totalpers"
+                },
+                "tooltip": {
+                    "showCustomFields": false
+                }
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 100,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {}
+        },
+        "7": {
+            "type": "markdown",
+            "title": "",
+            "content": "**Carbon usage**\n"
+        },
+        "8": {
+            "type": "markdown",
+            "title": "",
+            "content": "**Namespace usage**\n"
+        },
+        "9": {
+            "type": "markdown",
+            "title": "",
+            "content": "**Pod usage of specific $namespace**\n"
+        },
+        "10": {
+            "type": "markdown",
+            "title": "",
+            "content": "**Container usage of specific $podname**\n"
+        }
+    },
+    "layouts": {
+        "0": {
+            "x": 0,
+            "y": 1,
+            "w": 9,
+            "h": 6
+        },
+        "1": {
+            "x": 9,
+            "y": 1,
+            "w": 7,
+            "h": 6
+        },
+        "2": {
+            "x": 16,
+            "y": 1,
+            "w": 8,
+            "h": 6
+        },
+        "3": {
+            "x": 12,
+            "y": 8,
+            "w": 12,
+            "h": 6
+        },
+        "4": {
+            "x": 0,
+            "y": 8,
+            "w": 12,
+            "h": 6
+        },
+        "5": {
+            "x": 0,
+            "y": 15,
+            "w": 24,
+            "h": 6
+        },
+        "6": {
+            "x": 0,
+            "y": 22,
+            "w": 24,
+            "h": 6
+        },
+        "7": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 1
+        },
+        "8": {
+            "x": 0,
+            "y": 7,
+            "w": 24,
+            "h": 1
+        },
+        "9": {
+            "x": 0,
+            "y": 14,
+            "w": 24,
+            "h": 1
+        },
+        "10": {
+            "x": 0,
+            "y": 21,
+            "w": 24,
+            "h": 1
+        }
+    },
+    "importedWithCode": false,
+    "settings": {}
+}

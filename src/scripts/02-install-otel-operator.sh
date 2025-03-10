@@ -11,8 +11,3 @@ sleep 10
 
 echo "*********** Deploying the OpenTelemetry Operator ***********"
 kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.102.0/opentelemetry-operator.yaml
-
-# Install Jaeger operator
-# helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
-# helm repo update
-# helm install --namespace jaeger-operator --create-namespace jaeger-operator jaegertracing/jaeger-operator
