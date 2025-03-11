@@ -7,15 +7,14 @@ metadata:
   namespace: opentelemetry
 spec:
   mode: statefulset
-  # Using an older version of the DT Collector (based on an older Collector contrib version) 
+  # Using an older version of the Collector
   # where Python auto-instrumentation and context propagation doesn't break
   # image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:0.7.0
   image: otel/opentelemetry-collector-contrib:0.102.1
-  serviceAccount: otelcontribcol
   targetAllocator:
     enabled: true
-    serviceAccount: opentelemetry-targetallocator-sa
-    # serviceAccount: otelcontribcol
+    # serviceAccount: opentelemetry-targetallocator-sa
+    serviceAccount: otelcontribcol
     prometheusCR:
       enabled: true
       podMonitorSelector: {}
@@ -40,18 +39,27 @@ spec:
     # This ain't pretty, but it will do for now
     - name: CLUSTERNAME
       value: "pulumi-gke"
-
   config:
+
+    # Receiver config
     receivers:
       otlp:
         protocols:
           grpc: {}
           http: {}
 
+      # Pull k8s objects at given interval, and produce logs
+      k8sobjects:
+        auth_type: serviceAccount
+        objects:
+          - name: pods
+            mode: pull
+            interval: 30m
+
+      # Metrics
       prometheus:
         config:
           scrape_configs:
-            # Collector metrics
             - job_name: 'otel-collector'
               scrape_interval: 10s
               static_configs:
@@ -75,14 +83,6 @@ spec:
                 - action: labeldrop
                   regex: pid
 
-      # Pull k8s objects at given interval, and produce logs
-      k8sobjects:
-        auth_type: serviceAccount
-        objects:
-          - name: pods
-            mode: pull
-            interval: 30m
-
       # Metrics - ingest k8s metrics
       k8s_cluster:
         node_conditions_to_report: [ Ready, MemoryPressure ]
@@ -98,14 +98,46 @@ spec:
         endpoint: "https://${env:K8S_NODE_NAME}:10250"
         insecure_skip_verify: true
 
+    # Processor config
     processors:
+      # Metrics
       cumulativetodelta: {}
+
       batch: {}
 
       memory_limiter:
         check_interval: 1s
         limit_percentage: 70
         spike_limit_percentage: 30
+
+      transform/metrics:
+        error_mode: ignore
+        metric_statements:
+          - context: metric
+            statements:
+                - set(resource.attributes["k8s.container.name"], resource.attributes["container_name"]) where resource.attributes["container_name"] != nil
+                - set(resource.attributes["k8s.pod.name"], resource.attributes["pod_name"]) where resource.attributes["pod_name"] != nil
+                - set(resource.attributes["k8s.namespace.name"], resource.attributes["container_namespace"]) where resource.attributes["container_namespace"] != nil      
+
+      # Extract fields from k8s objects from log lines
+      transform/k8s:
+        error_mode: ignore
+        log_statements:
+          - context: log
+            statements:
+              - merge_maps(cache, body, "upsert")
+              - set(attributes["k8s.object.kind"], cache["kind"]) where cache["kind"] != nil
+              - merge_maps(cache,cache["metadata"], "upsert") where cache["metadata"] != nil
+              - set(attributes["k8s.namespace.name"], cache["namespace"]) where cache["namespace"] != nil
+              - merge_maps(cache,ExtractPatterns(String(cache["ownerReferences"]),"^.*kind\\\":\\\"(?P<kindowner>[^\"]*)\".*name\\\":\\\"(?P<nameowner>[^\"]*)\\\".*$"), "upsert") where cache["ownerReferences"] != nil
+              - set(attributes["dt.kubernetes.workload.kind"], ConvertCase( cache["kindowner"], "lower") ) where cache["kindowner"] != nil
+              - set(attributes["dt.kubernetes.workload.name"], cache["nameowner"]) where cache["nameowner"] != nil
+              - set(attributes["k8s.object.labels"], cache["labels"]) where cache["labels"] != nil
+              - set(attributes["k8s.pod.name"], cache["name"]) where cache["name"] != nil
+              - merge_maps(cache,cache["spec"], "upsert") where cache["spec"] != nil
+              - set(attributes["k8s.object.nodeselector"], String(cache["nodeSelector"])) where cache["nodeSelector"]!= nil
+              - set(attributes["k8s.node.name"], cache["nodeName"]) where cache["nodeName"]!= nil
+              - set(attributes["k8s.status"],cache["status"]) where cache["status"] != nil
 
       # Metrics
       k8sattributes/k8s:
@@ -116,20 +148,21 @@ spec:
         pod_association:
           - sources:
               - from: connection
-
+              # - from: resource_attribute
+              #   name: k8s.namespace.name
       resource:
         attributes:
           - key: k8s.cluster.name
             value: ${CLUSTERNAME}
             action: insert
 
-
+    # Exporter config
     exporters:
-      otlp/jaeger:
+      otlp:
         endpoint: 'otel-jaeger-collector:4317'
         tls:
           insecure: true
-      otlphttp/dt:
+      otlphttp:
         # endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
         endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
         headers:
@@ -141,17 +174,17 @@ spec:
       pipelines:
         traces:
           receivers: [ otlp ]
-          processors: [ memory_limiter, batch ]
-          exporters: [ otlp/jaeger, otlphttp/dt, debug ]
+          processors: [ memory_limiter,batch ]
+          exporters: [ otlp,otlphttp,debug ]
         metrics:
-          receivers: [ otlp, k8s_cluster, kubeletstats, prometheus ]
-          processors: [ memory_limiter, cumulativetodelta, batch ]
-          exporters: [ otlphttp/dt, debug ]
-        logs:
-          receivers: [ otlp ]
-          processors: [ memory_limiter, batch ]
-          exporters: [ otlphttp/dt, debug ]
+          receivers: [otlp, prometheus, k8s_cluster, kubeletstats]
+          processors: [ memory_limiter,transform/metrics,cumulativetodelta,batch ]
+          exporters: [ otlphttp,debug ]
         logs/k8s:
           receivers: [ k8sobjects ]
-          processors: [ memory_limiter, k8sattributes/k8s, resource, batch ]
-          exporters: [ otlphttp/dt, debug ]
+          processors: [ memory_limiter,transform/k8s,k8sattributes/k8s,resource,batch ]
+          exporters: [ otlphttp, debug ]
+        logs:
+          receivers: [ otlp ]
+          processors: [ memory_limiter,batch ]
+          exporters: [ otlphttp,debug ]

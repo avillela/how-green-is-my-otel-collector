@@ -32,6 +32,9 @@ helm install kepler kepler/kepler \
     --set canMount.usrSrc=false \
     --set extraEnvVars.ENABLE_PROCESS_METRICS="true"
 
+
+# Reference:
+# https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
 echo "*********** Deploying Grafana *********** "
 helm repo add grafana https://grafana.github.io/helm-charts
 helm install grafana grafana/grafana \

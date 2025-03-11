@@ -20,7 +20,6 @@ rules:
       - namespaces
       - namespaces/status
       - nodes
-      - nodes/metrics
       - nodes/spec
       - nodes/stats
       - nodes/proxy
@@ -35,12 +34,6 @@ rules:
       - get
       - list
       - watch
-  - apiGroups:
-      - ""
-    resources:
-    - configmaps
-    verbs:
-      - "get"
   - apiGroups:
       - "events.k8s.io"
     resources:
@@ -86,24 +79,11 @@ rules:
       - list
       - watch
   - apiGroups:
-    - monitoring.coreos.com
+      - apps
     resources:
-    - servicemonitors
-    - podmonitors
+      - deployments
     verbs:
-    - '*'
-  - apiGroups:
-    - discovery.k8s.io
-    resources:
-    - endpointslices
-    verbs: ["get", "list", "watch"]
-  - apiGroups:
-    - networking.k8s.io
-    resources:
-    - ingresses
-    verbs: ["get", "list", "watch"]
-  - nonResourceURLs: ["/metrics"]
-    verbs: ["get"]
+      - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
