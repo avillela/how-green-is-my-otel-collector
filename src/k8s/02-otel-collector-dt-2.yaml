@@ -9,8 +9,7 @@ spec:
   mode: statefulset
   # Using an older version of the DT Collector (based on an older Collector contrib version) 
   # where Python auto-instrumentation and context propagation doesn't break
-  # image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:0.7.0
-  image: otel/opentelemetry-collector-contrib:0.102.1
+  image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:0.7.0
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
@@ -44,17 +43,34 @@ spec:
               scrape_interval: 10s
               static_configs:
               - targets: [ '0.0.0.0:8888' ]
+              # - targets: [${env:MY_POD_IP}:8888]
+            - job_name: k8s
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - action: labeldrop
+                  regex: container_id
+                - action: labeldrop
+                  regex: pid
 
     processors:
       cumulativetodelta: {}
       batch: {}
+      transform:
+        error_mode: ignore
+        metric_statements:
+          - context: resource
+            statements:
+                - set(attributes["k8s.container.name"], attributes["container_name"]) where attributes["container_name"] != nil
+                - set(attributes["k8s.pod.name"], attributes["pod_name"]) where attributes["pod_name"] != nil
+                - set(attributes["k8s.namespace.name"], attributes["container_namespace"]) where attributes["container_namespace"] != nil      
 
     exporters:
-      otlp/jaeger:
+      otlp:
         endpoint: 'otel-jaeger-collector:4317'
         tls:
           insecure: true
-      otlphttp/dt:
+      otlphttp:
         # endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
         endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
         headers:
@@ -67,12 +83,12 @@ spec:
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [otlp/jaeger,otlphttp/dt,debug]
+          exporters: [otlp,otlphttp,debug]
         metrics:
           receivers: [otlp, prometheus]
-          processors: [cumulativetodelta]
-          exporters: [otlphttp/dt,debug]
+          processors: [transform,cumulativetodelta,batch]
+          exporters: [otlphttp,debug]
         logs:
           receivers: [otlp]
           processors: [batch]
-          exporters: [otlphttp/dt,debug]
+          exporters: [otlphttp,debug]

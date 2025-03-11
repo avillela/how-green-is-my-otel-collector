@@ -107,37 +107,37 @@ def write_kubeconfig(content):
 k8s_config.apply(lambda content: write_kubeconfig(content))
 
 # Make a Kubernetes provider instance that uses our cluster from above.
-k8s_provider = Provider("gke_k8s", kubeconfig=k8s_config)
+# k8s_provider = Provider("gke_k8s", kubeconfig=k8s_config)
 
-# Create a canary deployment to test that this cluster works.
-labels = {"app": "canary-{0}-{1}".format(get_project(), get_stack())}
-canary = Deployment(
-    "canary",
-    spec=DeploymentSpecArgs(
-        selector=LabelSelectorArgs(match_labels=labels),
-        replicas=1,
-        template=PodTemplateSpecArgs(
-            metadata=ObjectMetaArgs(labels=labels),
-            spec=PodSpecArgs(containers=[ContainerArgs(name="nginx", image="nginx")]),
-        ),
-    ),
-    opts=ResourceOptions(provider=k8s_provider),
-)
+# # Create a canary deployment to test that this cluster works.
+# labels = {"app": "canary-{0}-{1}".format(get_project(), get_stack())}
+# canary = Deployment(
+#     "canary",
+#     spec=DeploymentSpecArgs(
+#         selector=LabelSelectorArgs(match_labels=labels),
+#         replicas=1,
+#         template=PodTemplateSpecArgs(
+#             metadata=ObjectMetaArgs(labels=labels),
+#             spec=PodSpecArgs(containers=[ContainerArgs(name="nginx", image="nginx")]),
+#         ),
+#     ),
+#     opts=ResourceOptions(provider=k8s_provider),
+# )
 
-ingress = Service(
-    "ingress",
-    spec=ServiceSpecArgs(
-        type="LoadBalancer",
-        selector=labels,
-        ports=[ServicePortArgs(port=80)],
-    ),
-    opts=ResourceOptions(provider=k8s_provider),
-)
+# ingress = Service(
+#     "ingress",
+#     spec=ServiceSpecArgs(
+#         type="LoadBalancer",
+#         selector=labels,
+#         ports=[ServicePortArgs(port=80)],
+#     ),
+#     opts=ResourceOptions(provider=k8s_provider),
+# )
 
-# Finally, export the kubeconfig so that the client can easily access the cluster.
-export("kubeconfig", k8s_config)
-# Export the k8s ingress IP to access the canary deployment
-export(
-    "ingress_ip",
-    ingress.status.apply(lambda status: status.load_balancer.ingress[0].ip),
-)
+# # Finally, export the kubeconfig so that the client can easily access the cluster.
+# export("kubeconfig", k8s_config)
+# # Export the k8s ingress IP to access the canary deployment
+# export(
+#     "ingress_ip",
+#     ingress.status.apply(lambda status: status.load_balancer.ingress[0].ip),
+# )

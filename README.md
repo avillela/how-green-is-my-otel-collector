@@ -144,6 +144,9 @@ helm delete kepler --namespace kepler
 
 # Uninstall Kube Prometheus Stack
 helm delete prometheus --namespace prometheus
+
+# Uninstall Grafana
+helm delete grafana --namespace grafana
 ```
 
 ## Note from Henrik
@@ -209,3 +212,9 @@ This shows the energy calculation done by Keptn (maybe we can retool this for Gr
 Reference repos from Henrik:
 - https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
 - https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/master/deployment.sh
+
+
+
+## Additional stuff:
+
+kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=clustername="$CLUSTERNAME"  --from-literal=clusterid=$CLUSTERID  --from-literal=dt_api_token="$DTTOKEN"

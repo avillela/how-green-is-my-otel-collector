@@ -12,7 +12,9 @@ else
     kubectl apply -f src/k8s/00-secret${SUFFIX}.yaml
 fi
 
-kubectl apply -f src/k8s/01-rbac.yaml
+# kubectl apply -f src/k8s/01-ta-rbac.yaml
+# kubectl apply -f src/k8s/01-rbac.yaml
+kubectl apply -f src/k8s/01-target-allocator-rbac.yaml
 kubectl apply -f src/k8s/02-otel-collector${SUFFIX}.yaml
 kubectl apply -f src/k8s/03-instrumentation.yaml
 kubectl apply -f src/k8s/04-service-monitor.yaml
