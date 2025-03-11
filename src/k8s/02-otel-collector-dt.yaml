@@ -86,7 +86,7 @@ spec:
       # Metrics - ingest k8s metrics
       k8s_cluster:
         node_conditions_to_report: [ Ready, MemoryPressure ]
-        allocatable_types_to_report: [ cpu, memory,storage ]
+        allocatable_types_to_report: [ cpu, memory, storage ]
         resource_attributes:
           container.id:
             enabled: false
@@ -106,6 +106,35 @@ spec:
         check_interval: 1s
         limit_percentage: 70
         spike_limit_percentage: 30
+
+      transform/metrics:
+        error_mode: ignore
+        metric_statements:
+          - context: metric
+            statements:
+                - set(resource.attributes["k8s.container.name"], resource.attributes["container_name"]) where resource.attributes["container_name"] != nil
+                - set(resource.attributes["k8s.pod.name"], resource.attributes["pod_name"]) where resource.attributes["pod_name"] != nil
+                - set(resource.attributes["k8s.namespace.name"], resource.attributes["container_namespace"]) where resource.attributes["container_namespace"] != nil      
+
+      # Extract fields from k8s objects from log lines
+      transform/k8s:
+        error_mode: ignore
+        log_statements:
+          - context: log
+            statements:
+              - merge_maps(cache, body, "upsert")
+              - set(attributes["k8s.object.kind"], cache["kind"]) where cache["kind"] != nil
+              - merge_maps(cache,cache["metadata"], "upsert") where cache["metadata"] != nil
+              - set(attributes["k8s.namespace.name"], cache["namespace"]) where cache["namespace"] != nil
+              - merge_maps(cache,ExtractPatterns(String(cache["ownerReferences"]),"^.*kind\\\":\\\"(?P<kindowner>[^\"]*)\".*name\\\":\\\"(?P<nameowner>[^\"]*)\\\".*$"), "upsert") where cache["ownerReferences"] != nil
+              - set(attributes["dt.kubernetes.workload.kind"], ConvertCase( cache["kindowner"], "lower") ) where cache["kindowner"] != nil
+              - set(attributes["dt.kubernetes.workload.name"], cache["nameowner"]) where cache["nameowner"] != nil
+              - set(attributes["k8s.object.labels"], cache["labels"]) where cache["labels"] != nil
+              - set(attributes["k8s.pod.name"], cache["name"]) where cache["name"] != nil
+              - merge_maps(cache,cache["spec"], "upsert") where cache["spec"] != nil
+              - set(attributes["k8s.object.nodeselector"], String(cache["nodeSelector"])) where cache["nodeSelector"]!= nil
+              - set(attributes["k8s.node.name"], cache["nodeName"]) where cache["nodeName"]!= nil
+              - set(attributes["k8s.status"],cache["status"]) where cache["status"] != nil
 
       # Metrics
       k8sattributes/k8s:
@@ -144,8 +173,8 @@ spec:
           processors: [ memory_limiter, batch ]
           exporters: [ otlp/jaeger, otlphttp/dt, debug ]
         metrics:
-          receivers: [ otlp, k8s_cluster, kubeletstats, prometheus ]
-          processors: [ memory_limiter, cumulativetodelta, batch ]
+          receivers: [ otlp, prometheus, k8s_cluster, kubeletstats ]
+          processors: [ memory_limiter, transform/metrics, cumulativetodelta, batch ]
           exporters: [ otlphttp/dt, debug ]
         logs:
           receivers: [ otlp ]
@@ -153,5 +182,5 @@ spec:
           exporters: [ otlphttp/dt, debug ]
         logs/k8s:
           receivers: [ k8sobjects ]
-          processors: [ memory_limiter, k8sattributes/k8s, resource, batch ]
+          processors: [ memory_limiter, transform/k8s, k8sattributes/k8s, resource, batch ]
           exporters: [ otlphttp/dt, debug ]
