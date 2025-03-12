@@ -16,14 +16,47 @@ Ideally, you should run this example using a cloud-based provider, to get a real
 
 This repo will show you examples for running this with a cloud-based provider.
 
+Reference repositories:
+- https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
+- https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/master/deployment.sh
+
+
 ## Setup
 
 ### 1- Create Kubernetes cluster
 
 If you are using Google Cloud, follow the instructions [here](/src/pulumi/gke-cluster/README.md).
 
+### 2- Install the OpenTelemetry Operator
 
-### 2- Install Kepler
+We will be collecting Prometheus metrics without Prometheus. Do do this, we will be leveraging the [OpenTelemetry Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/)'s TargetAllocator and the [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)'s [Prometheus Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver).
+
+
+The script below deploys the [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)'s [`PodMonitor`](https://prometheus-operator.dev/docs/user-guides/getting-started/#using-podmonitors) and [`ServiceMonitor`](https://prometheus-operator.dev/docs/operator/design/#servicemonitor) CRDs, and installs the OpenTelemetry Operator.
+
+```bash
+./src/scripts/01-install-otel-operator.sh
+```
+
+### 3a- Install Kepler (Dynatrace backend)
+
+If you're using Dynatreace as a back-end use this script. Otherwise, go to Step 3b.
+
+The [following script](/src/scripts/01-install-kepler.sh) will install:
+
+1. [Kepler](https://sustainable-computing.io) via Helm.
+
+2. Grafana and a [Grafana dashboard](/src/kepler/kepler_dashboard.json) for Kepler.
+
+  For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
+
+  ```bash
+  ./src/scripts/01-install-kepler.sh
+  ```
+
+### 3b- Install Kepler (Jaeger, Prometheus, Grafana)
+
+If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script.
 
 The [following script](/src/scripts/01-install-kepler.sh) will install:
 
@@ -35,40 +68,35 @@ The [following script](/src/scripts/01-install-kepler.sh) will install:
 
 3. A [Grafana dashboard](/src/kepler/kepler_dashboard.json) for Kepler.
 
-For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
+    For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
 
-```bash
-./src/scripts/01-install-kepler.sh
-```
+    ```bash
+    ./src/scripts/01-install-kepler.sh
 
-### 3- Access the Grafana Kepler dashboard
+    Open up a new terminal window to set up Kubernetes port-forwarding to access the Grafana dashboard.
 
-Open up a new terminal window to set up Kubernetes port-forwarding to access the Grafana dashboard.
+    ```bash
+    export POD_NAME=$(kubectl --namespace prometheus get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=prometheus" -oname)
+    kubectl --namespace prometheus port-forward $POD_NAME 3000
+    ```
 
-```bash
-export POD_NAME=$(kubectl --namespace prometheus get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=prometheus" -oname)
-kubectl --namespace prometheus port-forward $POD_NAME 3000
-```
+    Grafana will be available at http://localhost:3000. The username is `admin`. The password can be obtained by running the the following command:
 
-Grafana will be available at http://localhost:3000. The default Grafana credentials are `admin/prom-operator`.
+    ```bash
+    kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+    ```
 
-The dashboard will be accessible via `Dashboards > Kepler Exporter Dashboard`
+    The dashboard will be accessible via `Dashboards > Kepler Exporter Dashboard`
 
-![grafana-dashboards-list](/images/grafana-dashboards-list-kepler.png)
+    ![grafana-dashboards-list](/images/grafana-dashboards-list-kepler.png)
 
-### 4- Deploy the OpenTelemetry Operator
+### 4- Build and publish images to image registry (Optional)
 
 This example runs a Python client and server app that have been instrumented with [OpenTelemetry](https://opentelemetry.io) via a combination of [code-based](https://opentelemetry.io/docs/concepts/instrumentation/code-based/) and [zero-code](https://opentelemetry.io/docs/concepts/instrumentation/zero-code/) instrumentation.
 
 Instrumentation is sent to an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/), which is deployed via the [OpenTelemetry Operator for Kubernetes](https://opentelemetry.io/docs/platforms/kubernetes/operator/).
 
-Deploying the Operator:
-
-```bash
-./src/scripts/02-install-otel-operator.sh
-```
-
-### 5- Build and publish images to image registry (Optional)
+For more information on the application architecture, check out the [README](src/python/README.md).
 
 If you would like to build container images of the example Python code yourself and deploy it to your own container registry, you are more than welcome to do so. Otherwise, feel free to skip this step and pull the images from my registry. 😁
 
@@ -89,7 +117,7 @@ GH_USERNAME="<your_github_username>"
 ./src/scripts/03-build-and-publish-images.sh $GH_TOKEN $GH_USERNAME
 ```
 
-### 6- Deploy the Kubernetes resources
+### 5- Deploy the Kubernetes resources
 
 This will deploy the exmaple Python code (client and server app), plus a Python app that emits Prometheus-style metrics. It will also deploy an `OpenTelemetryCollector` resource, which deploys an OpenTelmetry Collector and Target Allocator.
 
@@ -111,7 +139,7 @@ List metrics (mostly):
 kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 ```
 
-### 7- View the traces in Jaeger
+### 6- View the traces in Jaeger
 
 First, open up a new terminal window, and set up port-forwrading.
 
@@ -123,7 +151,7 @@ Jaeger will be available at http://localhost:16686.
 
 ![jager UI](/images/jaeger-ui.png)
 
-### 8- View the OTel Collector energy consumption
+### 8- View the OTel Collector energy consumption (Jaeger, Prometheus, Grafana deployment)
 
 Once the app has been running for a while, you'll be able to view the OTel Collector's energy consumption.
 
@@ -148,73 +176,3 @@ helm delete prometheus --namespace prometheus
 # Uninstall Grafana
 helm delete grafana --namespace grafana
 ```
-
-## Note from Henrik
-
-# k8s transform processor configuration
-
-Exammple [here](https://raw.githubusercontent.com/Dynatrace/snippets/master/technologies/open-telemetry/open-telemetry-demo-application-dashboard/otel-demo-helm-values.yaml)
-
-Snippet:
-
-```yaml
-processors:
-  transform:
-    error_mode: ignore
-    metric_statements:
-      - context: resource
-        statements:
-            - set(attributes["k8s.container.name"], attributes["container_name"]) where attributes["container_name"] != nil
-            - set(attributes["k8s.pod.name"], attributes["pod_name"]) where attributes["pod_name"] != nil
-            - set(attributes["k8s.namespace.name"], attributes["container_namespace"]) where attributes["container_namespace"] != nil
-```
-
-The above allows us to re-use existing vars in Grafana (standardized semantics) -> need to ask Henrik again what this means
-
-# Enable process metrics
-
-This value in `values.yaml` collects metrics on individual processes, and as a result, increases metrics cardinality:
-`ENABLE_PROCESS_METRICS: "true"`
-https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/0f64c162971740204fc932b6bcf604e1c6615b41/kepler/values.yaml#L61
-
-
-More on Kepler configuration [here](https://sustainable-computing.io/usage/general_config/).
-
-To reduce metrics cardinality, add [this scrape config](https://github.com/henrikrexed/Sustainability-workshop/blob/9408e93dcb6b2bd892f9e0c1e13c0eb9caaa507d/opentelemetry/openTelemetry-manifest_statefulset.yaml#L83-L86
-) to Prometheus receiver
-
-Dynatrace dashboard [here](https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/master/dynatrace/Kepler%20Energy%20usage.json
-). Try to create Grafana equivalent.
-
-Bonus: Aether project gives you more specific metrics for cloud provider: 
-- https://github.com/re-cinq/aether-kepler-source
-- https://github.com/re-cinq/aether
-
-Henrik's sustainability tips:
-1. Measure - if you don't know wha tyou're measuring you can't improve
-           - include energy consumption as main KPI on your CI/CD pipelines
-2. Optimize - pick and choose right locaiton for workload
-3. Profiling
-4. Optimize on resource allocation
-5. KubeGreen to shut down collectors on test envs
-
-** Instead of doing big things, use smaller things (e.g smaller collectors instead of giant one)
-** Some languages are more environmentally unfriendly than others (e.g. Python consumes a lot of energy). See stats [here](https://softjourn.com/insights/environmentally-friendly-programming-languages).
-
-
-## Additional crap
-
-This shows the energy calculation done by Keptn (maybe we can retool this for Grafana).
-
-`(sum(kepler_container_joules_total{pod_name=~"{{.pod}}.*",container_namespace="{{.ns}}"})/sum(kepler_container_joules_total{container_namespace="{{.ns}}"}))*100'`
-
-
-Reference repos from Henrik:
-- https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
-- https://github.com/Observe-Resolve/observeresolve-keplermetric/blob/master/deployment.sh
-
-
-
-## Additional stuff:
-
-kubectl create secret generic dynatrace  --from-literal=dynatrace_oltp_url="$DTURL" --from-literal=clustername="$CLUSTERNAME"  --from-literal=clusterid=$CLUSTERID  --from-literal=dt_api_token="$DTTOKEN"
