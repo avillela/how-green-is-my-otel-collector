@@ -1,6 +1,6 @@
 {
     "name": "default",
-    "image": "mcr.microsoft.com/devcontainers/python:dev-3.11-bullseye",
+    "image": "mcr.microsoft.com/devcontainers/python:dev-3.13-bullseye",
     "features": {
   
       "ghcr.io/devcontainers-extra/features/kubectl-asdf:2": {},

@@ -37,9 +37,23 @@ pulumi stack select dev
 
 Fully-qualified stackname: https://app.pulumi.com/<your_pulumi_username>/kepler-gke-cluster/dev
 
+Create virtual environment (do this once only)
+
+```bash
+# One-time only
+pip install virtualenv
+virtualenv venv
+source  venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
 4- Provision infrastructure
 
 ```bash
+# Make sure we're using the virtual environment
+source  venv/bin/activate
+
 # Preview changes
 pulumi preview
 

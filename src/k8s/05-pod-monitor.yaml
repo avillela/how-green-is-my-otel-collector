@@ -17,4 +17,4 @@ spec:
         - opentelemetry
   podMetricsEndpoints:
     - port: py-server-port
-      path: /metrics
+      # path: /metrics
