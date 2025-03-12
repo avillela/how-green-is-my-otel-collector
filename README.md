@@ -153,7 +153,7 @@ Note that you will also need to do some additional configuration, as documented 
 Deploy the manifests:
 
 ```bash
-./src/scripts/04-deploy-resources.sh dt
+./src/scripts/04-deploy-resources.sh dt split
 ```
 
 Once the Python app has been running for a while, you'll be able to view the OTel Collector's energy consumption in Dynatrace. Log on to Dynatrace by going to https://dynatrace.com.
@@ -169,7 +169,7 @@ Next, open up the [Dynatrace Dashboards app](https://docs.dynatrace.com/docs/ana
 Deploy the manifests
 
 ```bash
-./src/scripts/04-deploy-resources.sh
+./src/scripts/04-deploy-resources.sh oss nosplit
 ```
 
 Next, open up Jaeger. You'll need to first up a new terminal window, and set up port-forwrading.
