@@ -26,7 +26,7 @@ helm install kepler kepler/kepler \
     --set serviceMonitor.labels.release=prometheus \
     --set canMount.usrSrc=false
 
-# Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Target Allocator config
+# Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Prometheus Receiver config
 kubectl wait pod --namespace kepler -l "app.kubernetes.io/name=kepler" --for=condition=Ready --timeout=2m
 kubectl apply -f src/k8s/00-kepler-servicemonitor.yaml
 
@@ -41,4 +41,4 @@ GF_POD=$(
         -l app.kubernetes.io/name=grafana \
         -o jsonpath="{.items[0].metadata.name}"
 )
-kubectl cp src/kepler/kepler_dashboard.json prometheus/$GF_POD:/tmp/dashboards/kepler_dashboard.json
+kubectl cp src/kepler/grafana_kepler_dashboard.json prometheus/$GF_POD:/tmp/dashboards/grafana_kepler_dashboard.json

@@ -42,17 +42,15 @@ The script below deploys the [Prometheus Operator](https://github.com/prometheus
 
 If you're using Dynatreace as a back-end use this script. Otherwise, go to [Step 3b](#3b--install-kepler-jaeger-prometheus-grafana).
 
-The [following script](/src/scripts/01-install-kepler.sh) will install:
+The [following script](/src/scripts/01-install-kepler.sh) will install [Kepler](https://sustainable-computing.io) via Helm. It will also install an updated `kepler-prometheus-exporter` `ServiceMonitor` with Prometheus scrape configs for Kepler. We do this here so we don't have to do it in the OTel Collector's Prometheus Receiver configuration. 
 
-1. [Kepler](https://sustainable-computing.io) via Helm.
+For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
 
-2. Grafana and a [Grafana dashboard](/src/kepler/kepler_dashboard.json) for Kepler.
+Run the script:
 
-  For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
-
-  ```bash
-  ./src/scripts/01-install-kepler.sh
-  ```
+```bash
+./src/scripts/02-install-kepler.sh
+```
 
 ### 3b- Install Kepler (Jaeger, Prometheus, Grafana)
 
@@ -66,29 +64,34 @@ The [following script](/src/scripts/01-install-kepler.sh) will install:
 
 2. [Kepler](https://sustainable-computing.io) via Helm.
 
+    It will also install an updated `kepler-prometheus-exporter` `ServiceMonitor` with Prometheus scrape configs for Kepler. We do this here so we don't have to do it in the OTel Collector's Prometheus Receiver configuration. 
+
 3. A [Grafana dashboard](/src/kepler/kepler_dashboard.json) for Kepler.
 
     For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
 
-    ```bash
-    ./src/scripts/01-install-kepler.sh
 
-    Open up a new terminal window to set up Kubernetes port-forwarding to access the Grafana dashboard.
+Run the script: 
 
-    ```bash
-    export POD_NAME=$(kubectl --namespace prometheus get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=prometheus" -oname)
-    kubectl --namespace prometheus port-forward $POD_NAME 3000
-    ```
+```bash
+./src/scripts/02b-install-prom-and-kepler.sh
 
-    Grafana will be available at http://localhost:3000. The username is `admin`. The password can be obtained by running the the following command:
+Open up a new terminal window to set up Kubernetes port-forwarding to access the Grafana dashboard.
 
-    ```bash
-    kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-    ```
+```bash
+export POD_NAME=$(kubectl --namespace prometheus get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=prometheus" -oname)
+kubectl --namespace prometheus port-forward $POD_NAME 3000
+```
 
-    The dashboard will be accessible via `Dashboards > Kepler Exporter Dashboard`
+Grafana will be available at http://localhost:3000. The username is `admin`. The password can be obtained by running the the following command:
 
-    ![grafana-dashboards-list](/images/grafana-dashboards-list-kepler.png)
+```bash
+kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
+
+The dashboard will be accessible via `Dashboards > Kepler Exporter Dashboard`
+
+![grafana-dashboards-list](/images/grafana-dashboards-list-kepler.png)
 
 ### 4- Build and publish images to image registry (Optional)
 
@@ -121,10 +124,18 @@ GH_USERNAME="<your_github_username>"
 
 This will deploy the exmaple Python code (client and server app), plus a Python app that emits Prometheus-style metrics. It will also deploy an `OpenTelemetryCollector` resource, which deploys an OpenTelmetry Collector and Target Allocator.
 
-Deploy the manifests:
+Option 1: Deploy the manifests - Jaeger, Prometheus, Grafana
 
 ```bash
 ./src/scripts/04-deploy-resources.sh
+```
+
+Option 2: Deploy the manifests - Dynatrace backend
+
+Note that you will also need to do some additional configuration, as documented [here](https://github.com/avillela/otel-target-allocator-talk?tab=readme-ov-file#3b--kubernetes-deployment-with-dynatrace-backend).
+
+```bash
+./src/scripts/04-deploy-resources.sh dt
 ```
 
 Tail OTel Collector logs:
@@ -172,7 +183,4 @@ helm delete kepler --namespace kepler
 
 # Uninstall Kube Prometheus Stack
 helm delete prometheus --namespace prometheus
-
-# Uninstall Grafana
-helm delete grafana --namespace grafana
 ```

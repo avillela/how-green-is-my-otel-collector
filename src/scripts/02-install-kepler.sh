@@ -24,29 +24,6 @@ helm install kepler kepler/kepler \
     --set canMount.usrSrc=false \
     --set extraEnvVars.ENABLE_PROCESS_METRICS="true"
 
-# Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Target Allocator config
+# Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Prometheus Receiver config
 kubectl wait pod --namespace kepler -l "app.kubernetes.io/name=kepler" --for=condition=Ready --timeout=2m
 kubectl apply -f src/k8s/00-kepler-servicemonitor.yaml
-
-# Reference:
-# https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
-echo "*********** Deploying Grafana *********** "
-helm repo add grafana https://grafana.github.io/helm-charts
-helm install grafana grafana/grafana \
-  --namespace grafana \
-  --create-namespace
-
-# Get grafana password
-kubectl wait pod --namespace grafana -l "app.kubernetes.io/name=grafana" --for=condition=Ready --timeout=2m
-kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-
-# echo "*********** Adding Kepler dashboard to Grafana *********** "
-GF_POD=$(
-    kubectl get pod \
-        -n grafana \
-        -l app.kubernetes.io/name=grafana \
-        -o jsonpath="{.items[0].metadata.name}"
-)
-echo "## Grafana pod name is ${GF_POD}"
-kubectl cp src/kepler/grafana_kepler_dashboard.json grafana/$GF_POD:/etc/grafana/provisioning/dashboards/grafana_kepler_dashboard.json
-kubectl rollout restart -n grafana deployment --selector=app.kubernetes.io/name=grafana 
