@@ -58,22 +58,22 @@ spec:
               - targets: [ '0.0.0.0:8888' ]
 
             # Scrape metrics from Kepler, and drop metrics we don't want
-            - job_name: kepler
-              scrape_interval: 5s
-              static_configs:
-                - targets:
-                    - kepler.kepler.svc.cluster.local:9102
-              relabel_configs:
-                - source_labels: [ __name__ ]
-                  regex: 'kepler_process_uncore_joules'
-                  action: drop
-                - source_labels: [ __name__ ]
-                  regex: 'go_*'
-                  action: drop
-                - action: labeldrop
-                  regex: container_id
-                - action: labeldrop
-                  regex: pid
+            # - job_name: kepler
+            #   scrape_interval: 5s
+            #   static_configs:
+            #     - targets:
+            #         - kepler.kepler.svc.cluster.local:9102
+            #   relabel_configs:
+            #     - source_labels: [ __name__ ]
+            #       regex: 'kepler_process_uncore_joules'
+            #       action: drop
+            #     - source_labels: [ __name__ ]
+            #       regex: 'go_*'
+            #       action: drop
+            #     - action: labeldrop
+            #       regex: container_id
+            #     - action: labeldrop
+            #       regex: pid
 
       # Pull k8s objects at given interval, and produce logs
       k8sobjects:
@@ -107,14 +107,50 @@ spec:
         limit_percentage: 70
         spike_limit_percentage: 30
 
+      transform:
+        error_mode: ignore
+        log_statements:
+          - context: resource
+            statements:
+              - set(attributes["dt.kubernetes.workload.kind"], "statefulset") where IsString(attributes["k8s.statefulset.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.statefulset.name"]) where IsString(attributes["k8s.statefulset.name"])
+              - set(attributes["dt.kubernetes.workload.kind"], "deployment") where IsString(attributes["k8s.deployment.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.deployment.name"]) where IsString(attributes["k8s.deployment.name"])
+              - set(attributes["dt.kubernetes.workload.kind"], "daemonset") where IsString(attributes["k8s.daemonset.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.daemonset.name"]) where IsString(attributes["k8s.daemonset.name"])
+              - set(attributes["dt.kubernetes.cluster.id"], attributes["k8s.cluster.uid"]) where IsString(attributes["k8s.cluster.uid"])
+    
+        metric_statements:
+          - context: resource
+            statements:
+              - set(attributes["dt.kubernetes.workload.kind"], "statefulset") where IsString(attributes["k8s.statefulset.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.statefulset.name"]) where IsString(attributes["k8s.statefulset.name"])
+              - set(attributes["dt.kubernetes.workload.kind"], "deployment") where IsString(attributes["k8s.deployment.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.deployment.name"]) where IsString(attributes["k8s.deployment.name"])
+              - set(attributes["dt.kubernetes.workload.kind"], "daemonset") where IsString(attributes["k8s.daemonset.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.daemonset.name"]) where IsString(attributes["k8s.daemonset.name"])
+              - set(attributes["dt.kubernetes.cluster.id"], attributes["k8s.cluster.uid"]) where IsString(attributes["k8s.cluster.uid"])
+        trace_statements:
+          - context: resource
+            statements:
+              - set(attributes["dt.kubernetes.workload.kind"], "statefulset") where IsString(attributes["k8s.statefulset.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.statefulset.name"]) where IsString(attributes["k8s.statefulset.name"])
+              - set(attributes["dt.kubernetes.workload.kind"], "deployment") where IsString(attributes["k8s.deployment.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.deployment.name"]) where IsString(attributes["k8s.deployment.name"])
+              - set(attributes["dt.kubernetes.workload.kind"], "daemonset") where IsString(attributes["k8s.daemonset.name"])
+              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.daemonset.name"]) where IsString(attributes["k8s.daemonset.name"])
+              - set(attributes["dt.kubernetes.cluster.id"], attributes["k8s.cluster.uid"]) where IsString(attributes["k8s.cluster.uid"])
+
+
       transform/metrics:
         error_mode: ignore
         metric_statements:
-          - context: metric
+          - context: datapoint
             statements:
-                - set(resource.attributes["k8s.container.name"], resource.attributes["container_name"]) where resource.attributes["container_name"] != nil
-                - set(resource.attributes["k8s.pod.name"], resource.attributes["pod_name"]) where resource.attributes["pod_name"] != nil
-                - set(resource.attributes["k8s.namespace.name"], resource.attributes["container_namespace"]) where resource.attributes["container_namespace"] != nil      
+                - set(attributes["k8s.container.name"], attributes["container_name"]) where attributes["container_name"] != nil
+                - set(attributes["k8s.pod.name"], attributes["pod_name"]) where attributes["pod_name"] != nil
+                - set(attributes["k8s.namespace.name"], attributes["container_namespace"]) where attributes["container_namespace"] != nil      
+
 
       # Extract fields from k8s objects from log lines
       transform/k8s:
@@ -136,7 +172,33 @@ spec:
               - set(attributes["k8s.node.name"], cache["nodeName"]) where cache["nodeName"]!= nil
               - set(attributes["k8s.status"],cache["status"]) where cache["status"] != nil
 
-      # Metrics
+      # Enriches signals with k8s attributes
+      k8sattributes:
+        auth_type: "serviceAccount"
+        passthrough: false
+    
+        extract:
+          metadata:
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.deployment.name
+            - k8s.statefulset.name
+            - k8s.daemonset.name
+            - k8s.cronjob.name
+            - k8s.namespace.name
+            - k8s.node.name
+            - k8s.cluster.uid
+        pod_association:
+          - sources:
+            - from: resource_attribute
+              name: k8s.pod.name
+            - from: resource_attribute
+              name: k8s.namespace.name
+          - sources:
+              - from: connection
+
+
+      # Enriches metrics (because we put in metrics pipeline only) with k8s attributes
       k8sattributes/k8s:
         extract:
           metadata:
@@ -170,16 +232,24 @@ spec:
       pipelines:
         traces:
           receivers: [ otlp ]
-          processors: [ memory_limiter, batch ]
+          processors: [ memory_limiter, k8sattributes, transform, batch ]
           exporters: [ otlp/jaeger, otlphttp/dt, debug ]
         metrics:
-          receivers: [ otlp, prometheus, k8s_cluster, kubeletstats ]
-          processors: [ memory_limiter, transform/metrics, cumulativetodelta, batch ]
+          receivers: [ otlp ]
+          processors: [ memory_limiter, transform/metrics, k8sattributes, transform, cumulativetodelta, batch ]
           exporters: [ otlphttp/dt, debug ]
         logs:
           receivers: [ otlp ]
-          processors: [ memory_limiter, batch ]
+          processors: [ memory_limiter, k8sattributes, transform, batch ]
           exporters: [ otlphttp/dt, debug ]
+
+        # These pipelines are specific to our Kepler setup. We have separate pipelines so that we don't "pollute" OTel
+        # data coming in from our application traces, logs, and metrics.
+        metrics/prom:
+          receivers: [ prometheus, k8s_cluster, kubeletstats ]
+          processors: [ memory_limiter, transform/metrics, k8sattributes/k8s, cumulativetodelta, batch ]
+          exporters: [ otlphttp/dt, debug ]
+
         logs/k8s:
           receivers: [ k8sobjects ]
           processors: [ memory_limiter, transform/k8s, k8sattributes/k8s, resource, batch ]

@@ -1,0 +1,35 @@
+## Modified Kepler ServiceMonitor definition with prometheus scrape configs.
+## We enable PrometheusCR in the OTel Collector's Target Allocator, which means that instead of
+## Putting scrape configs in the Prometheus Receiver, we put them here.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kepler-prometheus-exporter
+  namespace: kepler
+  labels:
+    app.kubernetes.io/part-of: kepler
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/name: kepler
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: exporter
+      app.kubernetes.io/name: kepler
+  namespaceSelector:
+    matchNames:
+      - kepler
+  endpoints:
+    - port: http
+      interval: 15s
+      metricRelabelings:
+        - sourceLabels: [ __name__ ]
+          regex: 'kepler_process_uncore_joules'
+          action: drop
+        - sourceLabels: [ __name__ ]
+          regex: 'go_*'
+          action: drop
+        - action: labeldrop
+          regex: container_id
+        - action: labeldrop
+          regex: pid

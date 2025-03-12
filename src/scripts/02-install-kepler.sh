@@ -32,6 +32,9 @@ helm install kepler kepler/kepler \
     --set canMount.usrSrc=false \
     --set extraEnvVars.ENABLE_PROCESS_METRICS="true"
 
+# Intall modified PodMonitor. This way, we don't have to do Kepler scrap configs
+kubectl wait pod --namespace kepler -l "app.kubernetes.io/name=kepler" --for=condition=Ready --timeout=2m
+kubectl apply -f src/k8s/00-kepler-servicemonitor.yaml
 
 # Reference:
 # https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
