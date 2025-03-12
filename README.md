@@ -40,7 +40,7 @@ The script below deploys the [Prometheus Operator](https://github.com/prometheus
 
 ### 3a- Install Kepler (Dynatrace backend)
 
-If you're using Dynatreace as a back-end use this script. Otherwise, go to Step 3b.
+If you're using Dynatreace as a back-end use this script. Otherwise, go to [Step 3b](#3b--install-kepler-jaeger-prometheus-grafana).
 
 The [following script](/src/scripts/01-install-kepler.sh) will install:
 
@@ -56,7 +56,7 @@ The [following script](/src/scripts/01-install-kepler.sh) will install:
 
 ### 3b- Install Kepler (Jaeger, Prometheus, Grafana)
 
-If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script.
+If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Step 3a](#3a--install-kepler-dynatrace-backend).
 
 The [following script](/src/scripts/01-install-kepler.sh) will install:
 
