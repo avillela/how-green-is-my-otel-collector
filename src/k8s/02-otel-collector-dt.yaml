@@ -5,6 +5,8 @@ kind: OpenTelemetryCollector
 metadata:
   name: otelcol
   namespace: opentelemetry
+  labels:
+    app.kubernetes.io/destination: dynatrace
 spec:
   mode: statefulset
   # Using an older version of the DT Collector (based on an older Collector contrib version) 
@@ -15,13 +17,10 @@ spec:
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
-    # serviceAccount: otelcontribcol
     prometheusCR:
       enabled: true
       podMonitorSelector: {}
       serviceMonitorSelector: {}
-      ## If uncommented, only service monitors with this label will get picked up
-      #   app: my-app
   env:
     - name: DT_TOKEN
       valueFrom:

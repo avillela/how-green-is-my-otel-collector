@@ -25,7 +25,23 @@ Reference repositories:
 
 ### 1- Create Kubernetes cluster
 
-If you are using Google Cloud, follow the instructions [here](/src/pulumi/gke-cluster/README.md).
+If you are using Google Cloud, follow the instructions [here](/src/pulumi/gke-cluster/README.md). This will create a GKE cluster in Google Cloud using Pulumi.
+
+If you're feeling less adventurous feel free to use the gcloud CLI:
+
+```bash
+PROJECT_NAME=<your_project_name>
+gcloud auth login
+gcloud config set project ${PROJECT_NAME}$
+
+# Create GKE cluster
+ZONE=<your_gcp_zone>
+NAME=pulumi-gke
+gcloud container clusters create "${NAME}" \
+  --zone ${ZONE} \
+  --machine-type=n1-standard-4 \
+  --num-nodes=1
+```
 
 ### 2- Install the OpenTelemetry Operator
 
@@ -38,11 +54,15 @@ The script below deploys the [Prometheus Operator](https://github.com/prometheus
 ./src/scripts/01-install-otel-operator.sh
 ```
 
-### 3a- Install Kepler (Dynatrace backend)
+### 3 Install Kepler
 
-If you're using Dynatreace as a back-end use this script. Otherwise, go to [Step 3b](#3b--install-kepler-jaeger-prometheus-grafana).
+This step will install Kepler and any additional components on your Kubernetes cluster.
 
-The [following script](/src/scripts/01-install-kepler.sh) will install [Kepler](https://sustainable-computing.io) via Helm. It will also install an updated `kepler-prometheus-exporter` `ServiceMonitor` with Prometheus scrape configs for Kepler. We do this here so we don't have to do it in the OTel Collector's Prometheus Receiver configuration. 
+#### Install Option 1 - Dynatrace backend
+
+> 🚨 If you're using Dynatreace as a back-end use this script. Otherwise, go to [Install Option 2](#Install-Option-2--jaeger-prometheus-grafana).
+
+The [following script](/src/scripts/02-install-kepler.sh) will install [Kepler](https://sustainable-computing.io) via Helm. It will also install an updated `kepler-prometheus-exporter` `ServiceMonitor` with Prometheus scrape configs for Kepler. We do this here so we don't have to do it in the OTel Collector's Prometheus Receiver configuration. 
 
 For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
 
@@ -52,11 +72,11 @@ Run the script:
 ./src/scripts/02-install-kepler.sh
 ```
 
-### 3b- Install Kepler (Jaeger, Prometheus, Grafana)
+#### Install Option 2 - Jaeger, Prometheus, Grafana
 
-If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Step 3a](#3a--install-kepler-dynatrace-backend).
+> 🚨 If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Install Option 2](#Install-Option-1--dynatrace-backend).
 
-The [following script](/src/scripts/01-install-kepler.sh) will install:
+The [following script](/src/scripts/02b-install-prom-and-kepler.sh) will install:
 
 1. The [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) via Helm.
 
@@ -120,23 +140,72 @@ GH_USERNAME="<your_github_username>"
 ./src/scripts/03-build-and-publish-images.sh $GH_TOKEN $GH_USERNAME
 ```
 
-### 5- Deploy the Kubernetes resources
+### 5- Deploy the Kubernetes
 
 This will deploy the exmaple Python code (client and server app), plus a Python app that emits Prometheus-style metrics. It will also deploy an `OpenTelemetryCollector` resource, which deploys an OpenTelmetry Collector and Target Allocator.
 
-Option 1: Deploy the manifests - Jaeger, Prometheus, Grafana
+#### Deploy Option 1 - Dynatrace backend
+
+> 🚨 If you're using Dynatreace as a back-end use this script. Otherwise, go to [Deploy Option 2](#Deploy-Option-2--jaeger-prometheus-grafana).
+
+Note that you will also need to do some additional configuration, as documented [here](https://github.com/avillela/otel-target-allocator-talk?tab=readme-ov-file#3b--kubernetes-deployment-with-dynatrace-backend).
+
+Deploy the manifests:
+
+```bash
+./src/scripts/04-deploy-resources.sh dt
+```
+
+Once the Python app has been running for a while, you'll be able to view the OTel Collector's energy consumption in Dynatrace. Log on to Dynatrace by going to https://dynatrace.com.
+
+Next, open up the [Dynatrace Dashboards app](https://docs.dynatrace.com/docs/analyze-explore-automate/dashboards-and-notebooks/dashboards-new) and [upload](https://docs.dynatrace.com/docs/analyze-explore-automate/dashboards-and-notebooks/dashboards-new/get-started/dashboards-manage#dashboards-upload) the [Dynatrace Kepler Dashboard](/src/kepler/dynatrace_kepler_dashboard.json).
+
+![Dynatrace Kepler Dashboard](/images/dynatrace-dashboard-kepler.png)
+
+#### Deploy Option 2 - Jaeger, Prometheus, Grafana
+
+> 🚨 If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Deploy Option 1](#Deploy-Option-1--dynatrace-backend).
+
+Deploy the manifests
 
 ```bash
 ./src/scripts/04-deploy-resources.sh
 ```
 
-Option 2: Deploy the manifests - Dynatrace backend
-
-Note that you will also need to do some additional configuration, as documented [here](https://github.com/avillela/otel-target-allocator-talk?tab=readme-ov-file#3b--kubernetes-deployment-with-dynatrace-backend).
+Next, open up Jaeger. You'll need to first up a new terminal window, and set up port-forwrading.
 
 ```bash
-./src/scripts/04-deploy-resources.sh dt
+kubectl port-forward svc/otel-jaeger-query -n opentelemetry 16686:16686
 ```
+
+Jaeger will be available at http://localhost:16686.
+
+![jager UI](/images/jaeger-ui.png)
+
+Once the Python app has been running for a while, you'll be able to view the OTel Collector's energy consumption.
+
+Go to Grafana at http://localhost:3000, and naviagate to `Dashboards > Kepler Exporter Dashboard`.
+
+Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power consumption and carbon emissions of your Collector.
+
+![Grafana Kepler Dashboard](/images/grafana-dashboard-kepler.png)
+
+
+## Useful Commands
+
+### Nukify
+
+Nukify resoruces from the Kubernetes cluster without nukifying the cluster itself.
+
+```bash
+# Uninstall Kepler
+helm delete kepler --namespace kepler
+
+# Uninstall Kube Prometheus Stack
+helm delete prometheus --namespace prometheus
+```
+
+### OTel Collector goodies
 
 Tail OTel Collector logs:
 
@@ -148,39 +217,4 @@ List metrics (mostly):
 
 ```bash
 kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
-```
-
-### 6- View the traces in Jaeger
-
-First, open up a new terminal window, and set up port-forwrading.
-
-```bash
-kubectl port-forward svc/otel-jaeger-query -n opentelemetry 16686:16686
-```
-
-Jaeger will be available at http://localhost:16686.
-
-![jager UI](/images/jaeger-ui.png)
-
-### 8- View the OTel Collector energy consumption (Jaeger, Prometheus, Grafana deployment)
-
-Once the app has been running for a while, you'll be able to view the OTel Collector's energy consumption.
-
-Go to Grafana at http://localhost:3000, and naviagate to `Dashboards > Kepler Exporter Dashboard`.
-
-Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power consumption and carbon emissions of your Collector.
-
-![otel collector kepler dashboard](/images/otel-collector-consumption.png)
-
-
-## Nukify
-
-Nukify resoruces from the Kubernetes cluster without nukifying the cluster itself.
-
-```bash
-# Uninstall Kepler
-helm delete kepler --namespace kepler
-
-# Uninstall Kube Prometheus Stack
-helm delete prometheus --namespace prometheus
 ```
