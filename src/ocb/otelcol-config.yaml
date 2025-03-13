@@ -1,0 +1,37 @@
+# Minimalistic OTel Collector Config file to test the Collector build
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+      http: {}
+
+
+processors:
+  cumulativetodelta: {}
+  batch: {}
+
+  # Prevent out of memory (OOM) situations on the Collector
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 70
+    spike_limit_percentage: 30
+
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch ]
+      exporters: [ debug ]
+    metrics:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, cumulativetodelta, batch ]
+      exporters: [ debug ]
+    logs:
+      receivers: [ otlp ]
+      processors: [ memory_limiter, batch ]
+      exporters: [ debug ]

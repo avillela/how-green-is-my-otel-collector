@@ -31,3 +31,22 @@ sudo apt-get install apt-transport-https --yes
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
 sudo apt-get update
 sudo apt-get install helm
+
+### -------------------
+### Install OpenTelemetry Collector Builder (OCB)
+### Reference: https://opentelemetry.io/docs/collector/custom-collector/
+### -------------------
+
+# Get distro information
+if [ $(uname -m) = x86_64 ]; then
+    DISTRO="amd64"
+elif [ $(uname -m) = aarch64 ]; then
+    DISTRO="arm64"
+fi
+
+echo "Distro is ${DISTRO}"
+
+curl --proto '=https' --tlsv1.2 -fL -o ocb \
+https://github.com/open-telemetry/opentelemetry-collector/releases/download/cmd%2Fbuilder%2Fv0.102.1/ocb_0.102.1_linux_${DISTRO}
+chmod +x ocb
+sudo mv ocb /usr/local/bin/ocb

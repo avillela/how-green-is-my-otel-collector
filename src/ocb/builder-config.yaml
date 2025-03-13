@@ -1,0 +1,28 @@
+# Go modules for Collector core: https://pkg.go.dev/go.opentelemetry.io/collector
+# Go modules for Collector contrib: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib
+
+dist:
+  name: otelcol-kepler-benchmark
+  description: OTel Collector benchmark for Kepler
+  output_path: ./_build/col
+
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.102.1
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver v0.102.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sobjectsreceiver v0.102.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver v0.102.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver v0.102.0
+
+processors:
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/cumulativetodeltaprocessor v0.102.0
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.102.1
+  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.102.1
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.102.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/k8sattributesprocessor v0.102.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/resourceprocessor v0.102.0
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.102.1
+  - gomod: go.opentelemetry.io/collector/exporter/otlphttpexporter v0.102.1
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.102.1

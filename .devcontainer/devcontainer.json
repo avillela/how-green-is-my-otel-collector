@@ -2,13 +2,14 @@
     "name": "default",
     "image": "mcr.microsoft.com/devcontainers/python:dev-3.13-bullseye",
     "features": {
-  
+      "ghcr.io/devcontainers/features/go:1": {},
       "ghcr.io/devcontainers-extra/features/kubectl-asdf:2": {},
       "ghcr.io/dhoeric/features/k9s:1": {},
       "ghcr.io/flexwie/devcontainer-features/pulumi:1": {},
       "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     },
     "overrideFeatureInstallOrder": [
+        "ghcr.io/devcontainers/features/go",
         "ghcr.io/devcontainers-extra/features/kubectl-asdf",
         "ghcr.io/dhoeric/features/k9s",
         "ghcr.io/flexwie/devcontainer-features/pulumi",
