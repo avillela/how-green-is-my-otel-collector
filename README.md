@@ -36,7 +36,7 @@ gcloud config set project ${PROJECT_NAME}$
 
 # Create GKE cluster
 ZONE=<your_gcp_zone>
-NAME=pulumi-gke
+NAME=gke-kepler
 gcloud container clusters create "${NAME}" \
   --zone ${ZONE} \
   --machine-type=n1-standard-4 \

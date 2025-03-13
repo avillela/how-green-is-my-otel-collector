@@ -3,7 +3,7 @@ config:
   gcp:region: us-east1
   gcp:zone: us-east1-c
 
-  kepler-gke-cluster:cluster_name: pulumi-gke
+  kepler-gke-cluster:cluster_name: gke-kepler
   kepler-gke-cluster:disk_size_gb: "30"
   kepler-gke-cluster:disk_type: pd-standard
   kepler-gke-cluster:image_type: cos_containerd

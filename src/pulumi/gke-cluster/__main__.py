@@ -37,6 +37,7 @@ NODE_POOL_NAME = f"{CLUSTER_NAME}-node-pool"
 
 # Now, actually create the GKE cluster.
 k8s_cluster = Cluster(
+    name=CLUSTER_NAME,
     resource_name=CLUSTER_NAME,
     deletion_protection=False,
     initial_node_count=NODE_COUNT,

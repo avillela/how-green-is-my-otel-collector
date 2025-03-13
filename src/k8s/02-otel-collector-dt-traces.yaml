@@ -38,7 +38,7 @@ spec:
           fieldPath: spec.nodeName
     # This ain't pretty, but it will do for now
     - name: CLUSTERNAME
-      value: "pulumi-gke"
+      value: "gke-kepler"
 
   config:
     receivers:

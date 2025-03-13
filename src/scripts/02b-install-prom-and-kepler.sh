@@ -17,18 +17,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack   \
   --set alertmanager.enabled=false  --wait
 
 
-echo "*********** Deploying Kepler *********** "
-helm repo add kepler https://sustainable-computing-io.github.io/kepler-helm-chart
-helm install kepler kepler/kepler \
-    --namespace kepler \
-    --create-namespace \
-    --set serviceMonitor.enabled=true \
-    --set serviceMonitor.labels.release=prometheus \
-    --set canMount.usrSrc=false
-
-# Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Prometheus Receiver config
-kubectl wait pod --namespace kepler -l "app.kubernetes.io/name=kepler" --for=condition=Ready --timeout=2m
-kubectl apply -f src/k8s/00-kepler-servicemonitor.yaml
+./src/scripts/02-install-kepler.sh
 
 # Install Grafana Kepler dashboard
 kubectl wait pod --namespace prometheus -l "release=prometheus" --for=condition=Ready --timeout=2m

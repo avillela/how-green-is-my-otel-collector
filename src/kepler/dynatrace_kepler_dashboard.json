@@ -293,7 +293,7 @@
         },
         "2": {
             "type": "data",
-            "title": "CO2 Coal per namespace",
+            "title": "CO2 Natural Gas per namespace",
             "query": "timeseries joul=sum(kepler_container_joules_total),by:{container_namespace},interval:1h, from:-24h\n| fieldsAdd co2Coal=joul[]* 0.000000277777777777778*0.91\n| fieldsRemove joul",
             "visualization": "areaChart",
             "visualizationSettings": {
