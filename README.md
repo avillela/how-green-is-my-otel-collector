@@ -105,11 +105,7 @@ export POD_NAME=$(kubectl --namespace prometheus get pod -l "app.kubernetes.io/n
 kubectl --namespace prometheus port-forward $POD_NAME 3000
 ```
 
-Grafana will be available at http://localhost:3000. The username is `admin`. The password can be obtained by running the the following command:
-
-```bash
-kubectl get secret --namespace grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-```
+Grafana will be available at http://localhost:3000. The username is `admin`. The default Grafana credentials are `admin/prom-operator`.
 
 The dashboard will be accessible via `Dashboards > Kepler Exporter Dashboard`
 
