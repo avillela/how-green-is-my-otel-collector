@@ -6,8 +6,11 @@ These are the instructions for building the OpenTelemetry Collector distribution
 
 The instructions below show you how to build an OTel Collector which uses only the compoents required by the Collector in this repo.
 
-> **NOTE:** The OCB tool has [already been installed](/.devcontainer/post-create.sh) as part of the DevContainer for this repo;
+You do not need to run these steps unless you want to build a Collector image yourself using the OCB. The Docker image used by this repo is already available in GitHub Container Registry via:
 
+```bash
+docker pull ghcr.io/avillela/otelcol-kepler-benchmark-0.102.1:0.1.0
+```
 
 ## Steps
 
@@ -16,6 +19,8 @@ The instructions below show you how to build an OTel Collector which uses only t
 Build the Docker image that builds a Collector image using the OCB, and push it to GitHub.
 
 This approach ensures that it builds an arch-appropriate image.
+
+> 🚨 **NOTE:** The amd64 build is finnicky on Podman.
 
 ```bash
 GH_TOKEN=<your_github_token>
