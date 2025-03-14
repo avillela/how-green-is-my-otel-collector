@@ -1,5 +1,4 @@
-# This is the Dockerfile that Jacob Aronoff uses. I haven't testsed it or modified it for this project.
-# Use at your own risk.
+# This Dockerfile was provided by OTel Operator maintainer Jacob Aronoff. It is magical. That is all.
 FROM alpine:3.19 AS certs
 RUN apk --update add ca-certificates
 
@@ -9,27 +8,19 @@ WORKDIR /usr/bin/otelcol
 COPY ./builder-config.yaml manifest.yaml
 COPY ./otelcol-config.yaml config.yaml
 
-# COPY protos/ protos
-# COPY processors/ processors
-# COPY extensions/ extensions
 RUN --mount=type=cache,target=/root/.cache/go-build GO111MODULE=on go install go.opentelemetry.io/collector/cmd/builder@v0.102.1
 RUN mkdir -p ./_build/col && chmod +x ./_build/col
 RUN --mount=type=cache,target=/root/.cache/go-build builder --config manifest.yaml
-# RUN --mount=type=cache,target=/root/.cache/go-build ./_build/col validate --config config.yaml
 
 FROM gcr.io/distroless/base:latest
-# FROM alpine:3.19
 
 ARG USER_UID=10001
 USER ${USER_UID}
 
-# RUN ls -al
 
 COPY --from=build-stage /usr/bin/otelcol/config.yaml /etc/otelcol-contrib/config.yaml
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --chmod=755 --from=build-stage /usr/bin/otelcol/_build/col /otelcol
-
-# ENTRYPOINT [ "/bin/sh" ]
 
 ENTRYPOINT ["/otelcol/otelcol-kepler-benchmark"]
 CMD ["--config", "/etc/otelcol-contrib/config.yaml"]

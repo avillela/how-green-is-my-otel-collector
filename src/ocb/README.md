@@ -11,28 +11,64 @@ The instructions below show you how to build an OTel Collector which uses only t
 
 ## Steps
 
-### 1- Build the Collector binary
+### 1- Build the Collector image
 
-Use the OCB tool to build the Collector binary with the components that we need.
+Build the Docker image that builds a Collector image using the OCB, and push it to GitHub.
+
+This approach ensures that it builds an arch-appropriate image.
 
 ```bash
+GH_TOKEN=<your_github_token>
+GH_USERNAME=<your_github_username>
+
+echo $GH_TOKEN | docker login ghcr.io -u $GH_USERNAME --password-stdin
 cd src/ocb
-ocb --config builder-config.yaml
-```
 
-### 2- Build the Collector image
+# Enable Docker multi-arch builds
+docker run -it --rm --privileged tonistiigi/binfmt --install all
+docker buildx create --name mybuilder --use
 
-Build a Docker image of our newly-created Collector binary.
-
-I could've run the builder directly in the Dockerfile, but I was lazy and decided to snag the one from the [OTel Collector repo](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/cmd/otelcontribcol/Dockerfile).
-
-```bash
+# Build using docker-compose-collector.yaml, as per the archs specified in that file
 docker buildx bake --push -f docker-compose-collector.yaml
 ```
+
+If you prefer to build using plain 'ole Docker:
+
+```bash
+# Build
+docker build -t ghcr.io/${GH_USERNAME}/otelcol-kepler-benchmark-0.102.1:0.1.0 .
+
+docker buildx build --push \
+  -t ghcr.io/${avillela}/otelcol-kepler-benchmark-0.102.1:0.1.0 \
+  --platform=linux/arm64,linux/amd64 .
+```
+
+PS: If you want to build the docker image without pushing to the Docker registry, run:
+
+```bash
+docker buildx build --platform=linux/amd64,linux/arm64 \
+  -t test:0.1.0 \
+  -f Dockerfile.v3 . \
+  --load
+```
+
+### 2- Test
+
+Make sure that the build actually worked
+
+```bash
+docker run -it --rm -p 4317:4317 -p 4318:4318 \
+  ghcr.io/avillela/otelcol-kepler-benchmark-0.102.1:0.1.0
+```
+
+The image was built with a test config file, and the image will use this config file if none is provided.
 
 ## References
 
 * [Reverse-engineer a Docker image](https://stackoverflow.com/a/63050461)
 * [OTel Collector Dockerfile](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/cmd/otelcontribcol/Dockerfile)
 * [Go modules for Collector core](https://pkg.go.dev/go.opentelemetry.io/collector)
-# [Go modules for Collector contrib](https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib)
+* [Go modules for Collector contrib](https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib)
+* [Multi-Archi Go + Docker stuff](https://gist.github.com/AverageMarcus/78fbcf45e72e09d9d5e75924f0db4573)
+* [Medium article for multi arch stuff](https://archive.ph/m9lPH)
+* [More Multi-Arch stuff](https://www.docker.com/blog/faster-multi-platform-builds-dockerfile-cross-compilation-guide/)
