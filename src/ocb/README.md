@@ -6,6 +6,8 @@ These are the instructions for building the OpenTelemetry Collector distribution
 
 The instructions below show you how to build an OTel Collector which uses only the compoents required by the Collector in this repo.
 
+For more info on working with the OCB, check out [my blog post](https://adri-v.medium.com/so-you-built-a-custom-collector-with-the-opentelemetry-collector-builder-now-what-6588952ee6c5), which includes a number of gotchas that I encountered.
+
 You do not need to run these steps unless you want to build a Collector image yourself using the OCB. The Docker image used by this repo is already available in GitHub Container Registry via:
 
 ```bash
