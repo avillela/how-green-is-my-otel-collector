@@ -15,12 +15,12 @@ networks:
 services:
   otel-collector:
     container_name: otelcol-kepler-benchmark
-    image: ${IMAGE_PREFIX}/otelcol-kepler-benchmark-${IMAGE_VERSION}:0.1.0
+    image: ${IMAGE_PREFIX}/otelcol-kepler-benchmark-${BASE_COLLECTOR_VERSION}:${IMAGE_VERSION}
     build:
       context: .
       dockerfile: Dockerfile
       tags:
-        - ${IMAGE_PREFIX}/otelcol-kepler-benchmark-${IMAGE_VERSION}:0.1.0
+        - ${IMAGE_PREFIX}/otelcol-kepler-benchmark-${BASE_COLLECTOR_VERSION}:${IMAGE_VERSION}
       x-bake:
         platforms:
           - linux/amd64

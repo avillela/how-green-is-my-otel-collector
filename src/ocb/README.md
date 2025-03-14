@@ -44,17 +44,14 @@ If you prefer to build using plain 'ole Docker:
 docker build -t ghcr.io/${GH_USERNAME}/otelcol-kepler-benchmark-0.102.1:0.1.0 .
 
 docker buildx build --push \
-  -t ghcr.io/${avillela}/otelcol-kepler-benchmark-0.102.1:0.1.0 \
+  -t ghcr.io/${GH_USERNAME}/otelcol-kepler-benchmark-0.102.1:0.1.0 \
   --platform=linux/arm64,linux/amd64 .
 ```
 
 PS: If you want to build the docker image without pushing to the Docker registry, run:
 
 ```bash
-docker buildx build --platform=linux/amd64,linux/arm64 \
-  -t test:0.1.0 \
-  -f Dockerfile.v3 . \
-  --load
+docker buildx build --no-cache --load -t ghcr.io/${GH_USERNAME}/otelcol-kepler-benchmark-0.102.1:0.1.0 --platform=linux/arm64 .
 ```
 
 ### 2- Test
@@ -63,7 +60,7 @@ Make sure that the build actually worked
 
 ```bash
 docker run -it --rm -p 4317:4317 -p 4318:4318 \
-  ghcr.io/avillela/otelcol-kepler-benchmark-0.102.1:0.1.0
+  ghcr.io/${GH_USERNAME}/otelcol-kepler-benchmark-0.102.1:0.1.0
 ```
 
 The image was built with a test config file, and the image will use this config file if none is provided.

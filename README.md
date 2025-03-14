@@ -86,6 +86,8 @@ The [following script](/src/scripts/02b-install-prom-and-kepler.sh) will install
 
     It will also install an updated `kepler-prometheus-exporter` `ServiceMonitor` with Prometheus scrape configs for Kepler. We do this here so we don't have to do it in the OTel Collector's Prometheus Receiver configuration. 
 
+    Thanks to [Henrik Rexed](https://github.com/henrikrexed) for the [ServiceMonitor YAML definition](https://github.com/isItObservable/target-allocator/blob/master/kepler/serviceMonitor.yaml).
+
 3. A [Grafana dashboard](/src/kepler/kepler_dashboard.json) for Kepler.
 
     For more information, check out the [Kepler installation documentation](https://sustainable-computing.io/installation/kepler-helm/).
