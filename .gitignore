@@ -9,3 +9,4 @@ pyenv.cfg
 *test*
 *secret*
 *scratchpad*
+otelcol-kepler-benchmark/

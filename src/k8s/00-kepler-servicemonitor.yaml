@@ -1,6 +1,7 @@
 ## Modified Kepler ServiceMonitor definition with prometheus scrape configs.
 ## We enable PrometheusCR in the OTel Collector's Target Allocator, which means that instead of
 ## Putting scrape configs in the Prometheus Receiver, we put them here.
+## Grabbed this example from Henrik Rexed: https://github.com/isItObservable/target-allocator/blob/master/kepler/serviceMonitor.yaml
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

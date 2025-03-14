@@ -1,0 +1,36 @@
+# Reference for using with "docker buildx bake"
+# https://stackoverflow.com/a/77958767
+# https://docs.docker.com/build/bake/compose-file/
+
+x-default-logging: &logging
+  options:
+    max-size: "5m"
+    max-file: "2"
+
+networks:
+  default:
+    name: otel-lab
+    driver: bridge
+
+services:
+  otel-collector:
+    container_name: otelcol-kepler-benchmark
+    image: ${IMAGE_PREFIX}/otelcol-kepler-benchmark-${BASE_COLLECTOR_VERSION}:${IMAGE_VERSION}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - ${IMAGE_PREFIX}/otelcol-kepler-benchmark-${BASE_COLLECTOR_VERSION}:${IMAGE_VERSION}
+      x-bake:
+        platforms:
+          - linux/amd64
+          - linux/arm64
+    ports:
+      - 4317
+      - 4318
+      - 12001
+      - 55680
+      - 55678
+      - 55679
+    stop_grace_period: 1s
+      

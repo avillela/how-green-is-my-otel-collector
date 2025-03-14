@@ -3,17 +3,16 @@
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
-  name: otelcol
+  name: otelcol-k8s
   namespace: opentelemetry
   labels:
     app.kubernetes.io/destination: dynatrace
-    app.kubernetes.io/benchmark-test: otelcol-contrib
+    app.kubernetes.io/benchmark-test: otelcol-contrib-k8s
 spec:
   mode: statefulset
   # Using an older version of the DT Collector (based on an older Collector contrib version) 
   # where Python auto-instrumentation and context propagation doesn't break
   image: otel/opentelemetry-collector-contrib:0.102.1
-  imagePullPolicy: Always
   serviceAccount: otelcontribcol
   targetAllocator:
     enabled: true
@@ -222,19 +221,6 @@ spec:
 
     service:
       pipelines:
-        traces:
-          receivers: [ otlp ]
-          processors: [ memory_limiter, k8sattributes, transform, batch ]
-          exporters: [ otlp/jaeger, otlphttp/dt, debug ]
-        metrics:
-          receivers: [ otlp ]
-          processors: [ memory_limiter, transform/metrics, k8sattributes, transform, cumulativetodelta, batch ]
-          exporters: [ otlphttp/dt, debug ]
-        logs:
-          receivers: [ otlp ]
-          processors: [ memory_limiter, k8sattributes, transform, batch ]
-          exporters: [ otlphttp/dt, debug ]
-
         # These pipelines are specific to our Kepler setup. We have separate pipelines so that we don't "pollute" OTel
         # data coming in from our application traces, logs, and metrics.
         metrics/prom:
