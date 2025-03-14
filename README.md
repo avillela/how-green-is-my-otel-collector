@@ -151,7 +151,15 @@ Note that you will also need to do some additional configuration, as documented 
 Deploy the manifests:
 
 ```bash
-./src/scripts/04-deploy-resources.sh dt split
+# Send telemetry to Dynatrace using a single Collector using the collector-contrib image
+./src/scripts/04-deploy-resources.sh --run-mode dt --split-collectors nosplit
+
+# Send telemetry to Dynatrace using a single Collector using an image built with the OpenTelemetry Collector Builder
+./src/scripts/04-deploy-resources.sh --run-mode dt --split-collectors nosplitocb
+
+# Send telemetry to Dynatrace using a one Collector for k8s telemetry, and another Collector for application telemetry, both using 
+# the collector-contrib image
+./src/scripts/04-deploy-resources.sh --run-mode dt --split-collectors split
 ```
 
 Once the Python app has been running for a while, you'll be able to view the OTel Collector's energy consumption in Dynatrace. Log on to Dynatrace by going to https://dynatrace.com.
@@ -167,7 +175,7 @@ Next, open up the [Dynatrace Dashboards app](https://docs.dynatrace.com/docs/ana
 Deploy the manifests
 
 ```bash
-./src/scripts/04-deploy-resources.sh oss nosplit
+./src/scripts/04-deploy-resources.sh --run-mode oss --split-collectors nosplit
 ```
 
 Next, open up Jaeger. You'll need to first up a new terminal window, and set up port-forwrading.

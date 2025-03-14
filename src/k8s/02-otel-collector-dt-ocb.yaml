@@ -7,12 +7,12 @@ metadata:
   namespace: opentelemetry
   labels:
     app.kubernetes.io/destination: dynatrace
-    app.kubernetes.io/benchmark-test: otelcol-contrib
+    app.kubernetes.io/benchmark-test: otelcol-ocb
 spec:
   mode: statefulset
   # Using an older version of the DT Collector (based on an older Collector contrib version) 
   # where Python auto-instrumentation and context propagation doesn't break
-  image: otel/opentelemetry-collector-contrib:0.102.1
+  image: ghcr.io/avillela/otelcol-kepler-benchmark-0.102.1:0.1.0
   imagePullPolicy: Always
   serviceAccount: otelcontribcol
   targetAllocator:

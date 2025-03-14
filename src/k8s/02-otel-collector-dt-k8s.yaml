@@ -7,11 +7,11 @@ metadata:
   namespace: opentelemetry
   labels:
     app.kubernetes.io/destination: dynatrace
+    app.kubernetes.io/benchmark-test: otelcol-contrib-k8s
 spec:
   mode: statefulset
   # Using an older version of the DT Collector (based on an older Collector contrib version) 
   # where Python auto-instrumentation and context propagation doesn't break
-  # image: ghcr.io/dynatrace/dynatrace-otel-collector/dynatrace-otel-collector:0.7.0
   image: otel/opentelemetry-collector-contrib:0.102.1
   serviceAccount: otelcontribcol
   targetAllocator:
