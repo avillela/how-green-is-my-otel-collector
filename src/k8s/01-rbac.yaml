@@ -14,6 +14,20 @@ metadata:
     app: otelcontribcol
 rules:
   - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs: [ "get", "list", "watch" ]
+  - nonResourceURLs: [ "/metrics" ]
+    verbs: [ "get" ]
+  - apiGroups:
+      - "monitoring.coreos.com"
+    resources:
+      - servicemonitors
+      - podmonitors
+    verbs:
+      - '*'
+  - apiGroups:
       - ""
     resources:
       - events
@@ -22,6 +36,8 @@ rules:
       - nodes
       - nodes/spec
       - nodes/stats
+      - nodes/metrics
+      - configmaps
       - nodes/proxy
       - pods
       - pods/status
@@ -78,12 +94,6 @@ rules:
       - get
       - list
       - watch
-  - apiGroups:
-      - apps
-    resources:
-      - deployments
-    verbs:
-      - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

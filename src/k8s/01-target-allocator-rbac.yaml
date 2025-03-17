@@ -22,12 +22,18 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: [""]
   resources:
+  - events
   - nodes
   - nodes/metrics
   - services
   - endpoints
   - pods
+  - secrets
   verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources:
+  - events
+  verbs: ["patch", "create"]
 - apiGroups: [""]
   resources:
   - configmaps

@@ -10,6 +10,8 @@
 # README: https://github.com/henrikrexed/Sustainability-workshop/blob/master/README.md
 # https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
 
+# Kepler kepler-0.5.13 
+
 echo "*********** Deploying Kepler *********** "
 helm repo add kepler https://sustainable-computing-io.github.io/kepler-helm-chart
 # helm install kepler kepler/kepler \
@@ -22,7 +24,8 @@ helm install kepler kepler/kepler \
     --set serviceMonitor.enabled=true \
     --set serviceMonitor.labels.release=prometheus \
     --set canMount.usrSrc=false \
-    --set extraEnvVars.ENABLE_PROCESS_METRICS="true"
+    --set extraEnvVars.ENABLE_PROCESS_METRICS="true" \
+    --version "0.5.13"
 
 # Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Prometheus Receiver config
 kubectl wait pod --namespace kepler -l "app.kubernetes.io/name=kepler" --for=condition=Ready --timeout=2m
