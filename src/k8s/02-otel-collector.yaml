@@ -39,9 +39,9 @@ spec:
       prometheus:
         config:
           scrape_configs:
-            # Collector metrics
+           # Collector metrics
             - job_name: 'otel-collector'
-              scrape_interval: 10s
+              scrape_interval: 5s
               static_configs:
               - targets: [ '0.0.0.0:8888' ]
 

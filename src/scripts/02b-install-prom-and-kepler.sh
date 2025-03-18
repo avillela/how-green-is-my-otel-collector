@@ -10,11 +10,15 @@
 # README: https://github.com/henrikrexed/Sustainability-workshop/blob/master/README.md
 # https://github.com/henrikrexed/Sustainability-workshop/blob/master/deployment.sh
 
+# Kube Prometheus Stack kube-prometheus-stack-69.8.2
+
 echo "*********** Installing kube-prometheus-stack *********** "
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack   \
   --namespace prometheus --create-namespace \
-  --set alertmanager.enabled=false  --wait
+  --set alertmanager.enabled=false \
+  --version "69.8.2"
+  --wait
 
 
 ./src/scripts/02-install-kepler.sh

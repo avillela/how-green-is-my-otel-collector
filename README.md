@@ -58,9 +58,9 @@ The script below deploys the [Prometheus Operator](https://github.com/prometheus
 
 This step will install Kepler and any additional components on your Kubernetes cluster.
 
-#### Install Option 1 - Dynatrace backend
+#### Install Option 1 - No Prometheus
 
-> 🚨 If you're using Dynatreace as a back-end use this script. Otherwise, go to [Install Option 2](#Install-Option-2--jaeger-prometheus-grafana).
+> 🚨 If you're using Dynatreace as a back-end use this script. Otherwise, go to [Install Option 2](#Install-Option-2--with-prometheus).
 
 The [following script](/src/scripts/02-install-kepler.sh) will install [Kepler](https://sustainable-computing.io) via Helm. It will also install an updated `kepler-prometheus-exporter` `ServiceMonitor` with Prometheus scrape configs for Kepler. We do this here so we don't have to do it in the OTel Collector's Prometheus Receiver configuration. 
 
@@ -70,11 +70,12 @@ Run the script:
 
 ```bash
 ./src/scripts/02-install-kepler.sh
+./src/scripts/03-install-podmonitor-svcmonitor.sh
 ```
 
-#### Install Option 2 - Jaeger, Prometheus, Grafana
+#### Install Option 2 - With Prometheus
 
-> 🚨 If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Install Option 2](#Install-Option-1--dynatrace-backend).
+> 🚨 If you wish to also use Prometheus as a metrics backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend only for metrics, go to [Install Option 2](#Install-Option-1--no-prometheus).
 
 The [following script](/src/scripts/02b-install-prom-and-kepler.sh) will install:
 
@@ -135,16 +136,16 @@ Build and publish images:
 GH_TOKEN="<your_github_access_token>"
 GH_USERNAME="<your_github_username>"
 
-./src/scripts/03-build-and-publish-images.sh $GH_TOKEN $GH_USERNAME
+./src/scripts/04-build-and-publish-images.sh $GH_TOKEN $GH_USERNAME
 ```
 
 ### 5- Deploy the Kubernetes
 
 This will deploy the exmaple Python code (client and server app), plus a Python app that emits Prometheus-style metrics. It will also deploy an `OpenTelemetryCollector` resource, which deploys an OpenTelmetry Collector and Target Allocator.
 
-#### Deploy Option 1 - Dynatrace backend
+#### Deploy Option 1 - No Prometheus
 
-> 🚨 If you're using Dynatreace as a back-end use this script. Otherwise, go to [Deploy Option 2](#Deploy-Option-2--jaeger-prometheus-grafana).
+> 🚨 If you're using Dynatreace as a metrics back-end only use this script. Otherwise, go to [Deploy Option 2](#Deploy-Option-2--with-prometheus).
 
 Note that you will also need to do some additional configuration, as documented [here](https://github.com/avillela/otel-target-allocator-talk?tab=readme-ov-file#3b--kubernetes-deployment-with-dynatrace-backend).
 
@@ -152,14 +153,14 @@ Deploy the manifests:
 
 ```bash
 # Send telemetry to Dynatrace using a single Collector using the collector-contrib image
-./src/scripts/04-deploy-resources.sh --run-mode dt --split-collectors nosplit
+./src/scripts/05-deploy-resources.sh --run-mode dt --split-collectors nosplit
 
 # Send telemetry to Dynatrace using a single Collector using an image built with the OpenTelemetry Collector Builder
-./src/scripts/04-deploy-resources.sh --run-mode dt --split-collectors nosplitocb
+./src/scripts/05-deploy-resources.sh --run-mode dt --split-collectors nosplitocb
 
 # Send telemetry to Dynatrace using a one Collector for k8s telemetry, and another Collector for application telemetry, both using 
 # the collector-contrib image
-./src/scripts/04-deploy-resources.sh --run-mode dt --split-collectors split
+./src/scripts/05-deploy-resources.sh --run-mode dt --split-collectors split
 ```
 
 Once the Python app has been running for a while, you'll be able to view the OTel Collector's energy consumption in Dynatrace. Log on to Dynatrace by going to https://dynatrace.com.
@@ -168,14 +169,14 @@ Next, open up the [Dynatrace Dashboards app](https://docs.dynatrace.com/docs/ana
 
 ![Dynatrace Kepler Dashboard](/images/dynatrace-dashboard-kepler.png)
 
-#### Deploy Option 2 - Jaeger, Prometheus, Grafana
+#### Deploy Option 2 - With Prometheus
 
-> 🚨 If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Deploy Option 1](#Deploy-Option-1--dynatrace-backend).
+> 🚨 If you're using Jaeger and Prometheus as a backend with a Grafana dashboard, use this script. If you prefer to use the Dynatrace backend, go to [Deploy Option 1](#Deploy-Option-1--no-prometheus).
 
 Deploy the manifests
 
 ```bash
-./src/scripts/04-deploy-resources.sh --run-mode oss --split-collectors nosplit
+./src/scripts/05-deploy-resources.sh --run-mode oss --split-collectors nosplit
 ```
 
 Next, open up Jaeger. You'll need to first up a new terminal window, and set up port-forwrading.
