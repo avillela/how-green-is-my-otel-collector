@@ -25,7 +25,9 @@ Reference repositories:
 
 ### 1- Create Kubernetes cluster
 
-If you are using Google Cloud, follow the instructions [here](/src/pulumi/gke-cluster/README.md). This will create a GKE cluster in Google Cloud using Pulumi.
+#### Google Cloud Instructions:
+
+Follow the instructions [here](/src/pulumi/gke-cluster/README.md). This will create a GKE cluster in Google Cloud using Pulumi.
 
 If you're feeling less adventurous feel free to use the gcloud CLI:
 
@@ -42,6 +44,57 @@ gcloud container clusters create "${NAME}" \
   --machine-type=n1-standard-4 \
   --num-nodes=1
 ```
+
+#### AWS cloud Instructions : 
+
+Setup your aws cli using `aws configure`.
+
+#### Prerequisites for setting up an EKS cluster on AWS : 
+
+Make sure the credentials/role that you're using to setup EKS, has the following permissions : 
+
+```
+AWSServiceRoleForAmazonEKS
+AWSServiceRoleForAmazonEKSNodegroup
+AmazonEC2ContainerServiceforEC2Role
+AWSServiceRoleForECS
+AmazonEKSClusterPolicy
+AmazonEKSVPCResourceController
+AmazonEKSAutoClusterRole
+```
+
+To create the EKS cluster, we would need to run the following commands :
+
+**Step 1 :** 
+- Install ekctl - https://eksctl.io/installation/#for-unix 
+
+**Step 2:** 
+- Setup env var in the terminal.
+```bash
+export CLUSTER_NAME="aws-otel-cluster" # the name of your cluster
+export AWS_REGION="us-east-1" # you can choose any region you like
+```
+
+**Step 3:**
+- Now run the following command to create the cluster.
+```bash
+eksctl create cluster \
+  --name ${CLUSTER_NAME} \
+  --region ${AWS_REGION} \
+  --nodegroup-name standard-workers \
+  --node-type t3.medium \
+  --nodes 1 \
+  --nodes-min 1 \
+  --nodes-max 3 \
+  --managed
+```
+
+**Step 4:**
+- Update the kubeconfig to allow kubectl to access the cluster. 
+```sh
+aws eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}
+```
+
 
 ### 2- Install the OpenTelemetry Operator
 
@@ -98,7 +151,7 @@ Run the script:
 
 ```bash
 ./src/scripts/02b-install-prom-and-kepler.sh
-
+```
 Open up a new terminal window to set up Kubernetes port-forwarding to access the Grafana dashboard.
 
 ```bash
