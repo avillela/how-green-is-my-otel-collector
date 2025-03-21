@@ -1,5 +1,5 @@
 {
-    "version": 17,
+    "version": 18,
     "variables": [
         {
             "key": "ocbCollectorStartTime",
@@ -7,7 +7,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-14T00:30,2025-03-17T12:10,2025-03-18T10:33,2025-03-18T15:57",
+            "input": "2025-03-14T00:30,2025-03-17T12:10,2025-03-18T10:33,2025-03-18T15:57,2025-03-19T11:47,2025-03-21T13:22",
             "multiple": false
         },
         {
@@ -16,7 +16,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-12T16:04,2025-03-17T13:24,2025-03-18T12:39,2025-03-18T18:54",
+            "input": "2025-03-12T16:04,2025-03-17T13:24,2025-03-18T12:39,2025-03-18T18:54,2025-03-19T10:38,2025-03-21T12:15",
             "multiple": false
         },
         {
@@ -25,7 +25,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-13T10:46,2025-03-17T14:39,2025-03-18T14:11,2025-03-18T17:49",
+            "input": "2025-03-13T10:46,2025-03-17T14:39,2025-03-18T14:11,2025-03-18T17:49,2025-03-19T12:56",
             "multiple": false
         },
         {
@@ -42,7 +42,7 @@
         "4": {
             "title": "Ratio - Contrib Collector to OCB Collector",
             "type": "data",
-            "query": "timeseries joutelrate=avg(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")},  from:toTimestamp($contribCollectorStartTime), to: toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\")  \n| fieldsAdd kwh = joutelrate[]*3600\n| fieldsRemove joutelrate\n | append [\ntimeseries joutelrate_compare  = avg(kepler_container_joules_total, rate:1s), filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from: toTimestamp($ocbCollectorStartTime), to: toTimestamp($ocbCollectorStartTime) + duration(toLong($duration),unit:\"min\")    \n| fieldsAdd kwh_compare = joutelrate_compare[]*3600\n| fields kwh_compare,interval,timeframe=timeframe(from:  toTimestamp($contribCollectorStartTime), to:  toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]\n| fields v2=arrayAvg(kwh_compare), v3=arrayAvg(kwh)\n| summarize old=avg(v2), new=avg(v3)\n| fields ratio= ((old - new)/old)*100",
+            "query": "timeseries joutelrate=sum(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")},  from:toTimestamp($contribCollectorStartTime), to: toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\")  \n| fieldsAdd kwh = joutelrate[]*3600\n| fieldsRemove joutelrate\n | append [\ntimeseries joutelrate_compare  = sum(kepler_container_joules_total, rate:1s), filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from: toTimestamp($ocbCollectorStartTime), to: toTimestamp($ocbCollectorStartTime) + duration(toLong($duration),unit:\"min\")    \n| fieldsAdd kwh_compare = joutelrate_compare[]*3600\n| fields kwh_compare,interval,timeframe=timeframe(from:  toTimestamp($contribCollectorStartTime), to:  toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]\n| fields ocb=arrayAvg(kwh_compare), contrib=arrayAvg(kwh)\n| summarize old=avg(ocb), new=avg(contrib)\n| fields ratio= ((new-old)/new)*100",
             "visualization": "recordView",
             "visualizationSettings": {
                 "thresholds": [],
@@ -135,142 +135,10 @@
                 }
             }
         },
-        "8": {
-            "title": "Avg OCB Collector vs Collector Contrib (Joules)",
-            "type": "data",
-            "query": "timeseries ocb_collector = avg(kepler_container_joules_total) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd ocb_collector_totalpers=ocb_collector[]/todouble(interval/1m)\n  | fieldsRemove ocb_collector\n  | append [\ntimeseries contrib_collector = avg(kepler_container_joules_total) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_totalpers=contrib_collector[]/todouble(interval/1m)  \n  | fields contrib_collector_totalpers,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
-            "visualization": "lineChart",
-            "visualizationSettings": {
-                "thresholds": [],
-                "chartSettings": {
-                    "gapPolicy": "gap",
-                    "circleChartSettings": {
-                        "groupingThresholdType": "relative",
-                        "groupingThresholdValue": 0,
-                        "valueType": "relative"
-                    },
-                    "categoryOverrides": {},
-                    "curve": "linear",
-                    "pointsDisplay": "auto",
-                    "categoricalBarChartSettings": {
-                        "layout": "horizontal",
-                        "categoryAxisTickLayout": "horizontal",
-                        "scale": "absolute",
-                        "groupMode": "stacked",
-                        "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
-                    },
-                    "colorPalette": "categorical",
-                    "valueRepresentation": "absolute",
-                    "truncationMode": "middle",
-                    "bandChartSettings": {
-                        "lower": "ocb_collector_totalpers",
-                        "upper": "ocb_collector_totalpers"
-                    },
-                    "xAxisScaling": "analyzedTimeframe",
-                    "xAxisLabel": "timeframe",
-                    "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
-                    "fieldMapping": {
-                        "timestamp": "timeframe",
-                        "leftAxisValues": [
-                            "ocb_collector_totalpers",
-                            "contrib_collector_totalpers"
-                        ]
-                    },
-                    "leftYAxisSettings": {}
-                },
-                "singleValue": {
-                    "showLabel": true,
-                    "label": "",
-                    "prefixIcon": "AnalyticsIcon",
-                    "isIconVisible": false,
-                    "autoscale": true,
-                    "alignment": "center",
-                    "colorThresholdTarget": "value"
-                },
-                "table": {
-                    "rowDensity": "condensed",
-                    "enableSparklines": false,
-                    "hiddenColumns": [],
-                    "linewrapEnabled": false,
-                    "lineWrapIds": [],
-                    "monospacedFontEnabled": false,
-                    "monospacedFontColumns": [],
-                    "columnWidths": {},
-                    "columnTypeOverrides": [
-                        {
-                            "fields": [
-                                "contrib_collector_totalpers"
-                            ],
-                            "value": "sparkline",
-                            "id": 1742305409686
-                        }
-                    ]
-                },
-                "honeycomb": {
-                    "shape": "hexagon",
-                    "legend": {
-                        "hidden": false,
-                        "position": "auto",
-                        "ratio": "auto"
-                    },
-                    "dataMappings": {},
-                    "displayedFields": [],
-                    "truncationMode": "middle",
-                    "colorMode": "color-palette",
-                    "colorPalette": "categorical"
-                },
-                "histogram": {
-                    "legend": {
-                        "position": "auto"
-                    },
-                    "yAxis": {
-                        "label": "Frequency",
-                        "isLabelVisible": true,
-                        "scale": "linear"
-                    },
-                    "colorPalette": "categorical",
-                    "dataMappings": [],
-                    "variant": "single",
-                    "truncationMode": "middle"
-                },
-                "valueBoundaries": {
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "autoSelectVisualization": true,
-                "unitsOverrides": [
-                    {
-                        "identifier": null,
-                        "unitCategory": "unspecified",
-                        "baseUnit": "none",
-                        "displayUnit": null,
-                        "decimals": 2,
-                        "suffix": "",
-                        "delimiter": false,
-                        "added": 1742325318152
-                    }
-                ]
-            },
-            "querySettings": {
-                "maxResultRecords": 1000,
-                "defaultScanLimitGbytes": 500,
-                "maxResultMegaBytes": 1,
-                "defaultSamplingRatio": 10,
-                "enableSampling": false
-            },
-            "davis": {
-                "enabled": false,
-                "davisVisualization": {
-                    "isAvailable": true
-                }
-            }
-        },
         "9": {
-            "title": "Avg OCB Collector vs Collector Contrib (kWh)",
+            "title": "OCB Collector vs Contrib Collector (kWh)",
             "type": "data",
-            "query": "timeseries ocb_collector_joulerate = avg(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd ocb_collector_kwh=ocb_collector_joulerate[]*3600\n  | fieldsRemove ocb_collector_joulerate\n  | append [\ntimeseries contrib_collector_joulerate = avg(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
+            "query": "timeseries ocb_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd ocb_collector_kwh=ocb_collector_joulerate[]*3600\n  | fieldsRemove ocb_collector_joulerate\n  | append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
@@ -295,7 +163,7 @@
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "xAxisScaling": "analyzedTimeframe",
+                    "xAxisScaling": "auto",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
                     "hiddenLegendFields": [],
@@ -388,129 +256,9 @@
             }
         },
         "10": {
-            "title": "Sum Separate Contrib Collectors vs Single Contrib Collector (kWh)",
+            "title": "Separate Contrib (Combined) Collectors vs Single Contrib Collector (kWh)",
             "type": "data",
             "query": "timeseries separate_contrib_collectors_joulerate = sum(kepler_container_joules_total, rate:1m), filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
-            "visualization": "lineChart",
-            "visualizationSettings": {
-                "thresholds": [],
-                "chartSettings": {
-                    "gapPolicy": "gap",
-                    "circleChartSettings": {
-                        "groupingThresholdType": "relative",
-                        "groupingThresholdValue": 0,
-                        "valueType": "relative"
-                    },
-                    "categoryOverrides": {},
-                    "curve": "linear",
-                    "pointsDisplay": "auto",
-                    "categoricalBarChartSettings": {
-                        "layout": "horizontal",
-                        "categoryAxisTickLayout": "horizontal",
-                        "scale": "absolute",
-                        "groupMode": "stacked",
-                        "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
-                    },
-                    "colorPalette": "categorical",
-                    "valueRepresentation": "absolute",
-                    "truncationMode": "middle",
-                    "bandChartSettings": {
-                        "lower": "separate_contrib_collectors_kwh",
-                        "upper": "contrib_collector_kwh"
-                    },
-                    "xAxisScaling": "auto",
-                    "xAxisLabel": "timeframe",
-                    "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
-                    "fieldMapping": {
-                        "timestamp": "timeframe",
-                        "leftAxisValues": [
-                            "separate_contrib_collectors_kwh",
-                            "contrib_collector_kwh"
-                        ]
-                    },
-                    "leftYAxisSettings": {}
-                },
-                "singleValue": {
-                    "showLabel": true,
-                    "label": "",
-                    "prefixIcon": "AnalyticsIcon",
-                    "isIconVisible": false,
-                    "autoscale": true,
-                    "alignment": "center",
-                    "colorThresholdTarget": "value"
-                },
-                "table": {
-                    "rowDensity": "condensed",
-                    "enableSparklines": false,
-                    "hiddenColumns": [],
-                    "linewrapEnabled": false,
-                    "lineWrapIds": [],
-                    "monospacedFontEnabled": false,
-                    "monospacedFontColumns": [],
-                    "columnWidths": {},
-                    "columnTypeOverrides": [
-                        {
-                            "fields": [
-                                "contrib_collector_kwh"
-                            ],
-                            "value": "sparkline",
-                            "id": 1742314257368
-                        }
-                    ]
-                },
-                "honeycomb": {
-                    "shape": "hexagon",
-                    "legend": {
-                        "hidden": false,
-                        "position": "auto",
-                        "ratio": "auto"
-                    },
-                    "dataMappings": {},
-                    "displayedFields": [],
-                    "truncationMode": "middle",
-                    "colorMode": "color-palette",
-                    "colorPalette": "categorical"
-                },
-                "histogram": {
-                    "legend": {
-                        "position": "auto"
-                    },
-                    "yAxis": {
-                        "label": "Frequency",
-                        "isLabelVisible": true,
-                        "scale": "linear"
-                    },
-                    "colorPalette": "categorical",
-                    "dataMappings": [],
-                    "variant": "single",
-                    "truncationMode": "middle"
-                },
-                "valueBoundaries": {
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "autoSelectVisualization": true
-            },
-            "querySettings": {
-                "maxResultRecords": 1000,
-                "defaultScanLimitGbytes": 500,
-                "maxResultMegaBytes": 1,
-                "defaultSamplingRatio": 10,
-                "enableSampling": false
-            },
-            "davis": {
-                "enabled": false,
-                "davisVisualization": {
-                    "isAvailable": true
-                }
-            }
-        },
-        "11": {
-            "title": "Avg Separate Contrib Collectors vs Single Contrib Collector (kWh)",
-            "type": "data",
-            "query": "timeseries separate_contrib_collectors_joulerate = avg(kepler_container_joules_total, rate:1s), filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = avg(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
@@ -630,7 +378,7 @@
         "12": {
             "title": "Ratio - Contrib Collector to Two Separate Contrib Collectors",
             "type": "data",
-            "query": "timeseries joutelrate=avg(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")},  from:toTimestamp($contribCollectorStartTime), to: toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\")  \n| fieldsAdd kwh = joutelrate[]*3600\n| fieldsRemove joutelrate\n | append [\ntimeseries joutelrate_compare  = avg(kepler_container_joules_total, rate:1s), filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from: toTimestamp($splitContribCollectorStartTime), to: toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration),unit:\"min\")    \n| fieldsAdd kwh_compare = joutelrate_compare[]*3600\n| fields kwh_compare,interval,timeframe=timeframe(from:  toTimestamp($contribCollectorStartTime), to:  toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]\n| fields v2=arrayAvg(kwh_compare), v3=arrayAvg(kwh)\n| summarize old=avg(v2), new=avg(v3)\n| fields ratio= ((old - new)/old)*100",
+            "query": "timeseries joutelrate=sum(kepler_container_joules_total, rate:1s) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")},  from:toTimestamp($contribCollectorStartTime), to: toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\")  \n| fieldsAdd kwh = joutelrate[]*3600\n| fieldsRemove joutelrate\n | append [\ntimeseries joutelrate_compare  = sum(kepler_container_joules_total, rate:1s), filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from: toTimestamp($splitContribCollectorStartTime), to: toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration),unit:\"min\")    \n| fieldsAdd kwh_compare = joutelrate_compare[]*3600\n| fields kwh_compare,interval,timeframe=timeframe(from:  toTimestamp($contribCollectorStartTime), to:  toTimestamp($contribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]\n| fields separate_coll=arrayAvg(kwh_compare), single_coll=arrayAvg(kwh)\n| summarize old=avg(separate_coll), new=avg(single_coll)\n| fields ratio= ((new - old)/new)*100",
             "visualization": "recordView",
             "visualizationSettings": {
                 "thresholds": [],
@@ -724,9 +472,9 @@
             }
         },
         "13": {
-            "title": "Memory - Separate Contrib Collectors vs Single Contrib Collector",
+            "title": "RSS Memory - Separate Contrib Collectors vs Single Contrib Collector",
             "type": "data",
-            "query": "timeseries separate_contrib_collectors_memory = avg(otelcol_process_memory_rss, rate:1s), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector_memory = avg(otelcol_process_memory_rss, rate:1s), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector_memory,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]\n",
+            "query": "timeseries separate_contrib_collectors_memory = avg(otelcol_process_memory_rss), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector_memory = avg(otelcol_process_memory_rss), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector_memory,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]\n",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
@@ -766,7 +514,8 @@
                     "bandChartSettings": {
                         "lower": "separate_contrib_collectors_memory",
                         "upper": "contrib_collector_memory"
-                    }
+                    },
+                    "seriesOverrides": []
                 },
                 "singleValue": {
                     "showLabel": true,
@@ -789,11 +538,10 @@
                     "columnTypeOverrides": [
                         {
                             "fields": [
-                                "separate_contrib_collectors_memory",
                                 "contrib_collector_memory"
                             ],
                             "value": "sparkline",
-                            "id": 1742338974848
+                            "id": 1742571289411
                         }
                     ]
                 },
@@ -828,7 +576,8 @@
                     "min": "auto",
                     "max": "auto"
                 },
-                "autoSelectVisualization": true
+                "autoSelectVisualization": true,
+                "unitsOverrides": []
             },
             "querySettings": {
                 "maxResultRecords": 1000,
@@ -845,9 +594,9 @@
             }
         },
         "14": {
-            "title": "Memory - Contrib Collectors vs OCB Collector",
+            "title": "RSS Memory - Contrib Collectors vs OCB Collector",
             "type": "data",
-            "query": "timeseries ocb_collectors_memory = avg(otelcol_process_memory_rss, rate:1s), from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector_memory = avg(otelcol_process_memory_rss, rate:1s), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector_memory,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
+            "query": "timeseries ocb_collectors_memory = avg(otelcol_process_memory_rss), from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector_memory = avg(otelcol_process_memory_rss), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector_memory,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
@@ -963,6 +712,379 @@
                     "isAvailable": true
                 }
             }
+        },
+        "15": {
+            "title": "Memory Allocated for Heap - Contrib Collectors vs OCB Collector",
+            "type": "data",
+            "query": "timeseries ocb_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "gapPolicy": "gap",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "relative",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "curve": "linear",
+                    "pointsDisplay": "auto",
+                    "categoricalBarChartSettings": {
+                        "layout": "horizontal",
+                        "categoryAxisTickLayout": "horizontal",
+                        "scale": "absolute",
+                        "groupMode": "stacked",
+                        "colorPaletteMode": "multi-color",
+                        "valueAxisScale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "valueRepresentation": "absolute",
+                    "truncationMode": "middle",
+                    "xAxisScaling": "analyzedTimeframe",
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "hiddenLegendFields": [],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "ocb_collector",
+                            "contrib_collector"
+                        ]
+                    },
+                    "leftYAxisSettings": {},
+                    "bandChartSettings": {
+                        "lower": "ocb_collector",
+                        "upper": "contrib_collector"
+                    }
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "",
+                    "prefixIcon": "AnalyticsIcon",
+                    "isIconVisible": false,
+                    "autoscale": true,
+                    "alignment": "center",
+                    "colorThresholdTarget": "value"
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "linewrapEnabled": false,
+                    "lineWrapIds": [],
+                    "monospacedFontEnabled": false,
+                    "monospacedFontColumns": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "contrib_collector"
+                            ],
+                            "value": "sparkline",
+                            "id": 1742394593857
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto",
+                        "ratio": "auto"
+                    },
+                    "dataMappings": {},
+                    "displayedFields": [],
+                    "truncationMode": "middle",
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": {
+                        "position": "auto"
+                    },
+                    "yAxis": {
+                        "label": "Frequency",
+                        "isLabelVisible": true,
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [],
+                    "variant": "single",
+                    "truncationMode": "middle"
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "autoSelectVisualization": true
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 1,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {
+                "enabled": false,
+                "davisVisualization": {
+                    "isAvailable": true
+                }
+            }
+        },
+        "16": {
+            "title": "Separate Contrib Collectors vs Single Contrib Collector (kWh)",
+            "type": "data",
+            "query": "timeseries separate_contrib_collectors_joulerate = sum(kepler_container_joules_total, rate:1m), by:{k8s.pod.name}, filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "gapPolicy": "gap",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "relative",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "curve": "linear",
+                    "pointsDisplay": "auto",
+                    "categoricalBarChartSettings": {
+                        "layout": "horizontal",
+                        "categoryAxisTickLayout": "horizontal",
+                        "scale": "absolute",
+                        "groupMode": "stacked",
+                        "colorPaletteMode": "multi-color",
+                        "valueAxisScale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "valueRepresentation": "absolute",
+                    "truncationMode": "middle",
+                    "bandChartSettings": {
+                        "lower": "separate_contrib_collectors_kwh",
+                        "upper": "contrib_collector_kwh"
+                    },
+                    "xAxisScaling": "auto",
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "hiddenLegendFields": [],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "separate_contrib_collectors_kwh",
+                            "contrib_collector_kwh"
+                        ]
+                    },
+                    "leftYAxisSettings": {},
+                    "seriesOverrides": [
+                        {
+                            "seriesId": [
+                                "otelcol-k8s-collector-0",
+                                "separate_contrib_collectors_kwh"
+                            ],
+                            "override": {
+                                "color": {
+                                    "Default": "var(--dt-colors-charts-categorical-color-02-default, #2c2f3f)"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "",
+                    "prefixIcon": "AnalyticsIcon",
+                    "isIconVisible": false,
+                    "autoscale": true,
+                    "alignment": "center",
+                    "colorThresholdTarget": "value"
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "linewrapEnabled": false,
+                    "lineWrapIds": [],
+                    "monospacedFontEnabled": false,
+                    "monospacedFontColumns": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "contrib_collector_kwh"
+                            ],
+                            "value": "sparkline",
+                            "id": 1742314257368
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto",
+                        "ratio": "auto"
+                    },
+                    "dataMappings": {},
+                    "displayedFields": [],
+                    "truncationMode": "middle",
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": {
+                        "position": "auto"
+                    },
+                    "yAxis": {
+                        "label": "Frequency",
+                        "isLabelVisible": true,
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [],
+                    "variant": "single",
+                    "truncationMode": "middle"
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "autoSelectVisualization": true
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 1,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {
+                "enabled": false,
+                "davisVisualization": {
+                    "isAvailable": true
+                }
+            }
+        },
+        "17": {
+            "title": "Memory Allocated for Heap - Contrib Collectors vs OCB Collector",
+            "type": "data",
+            "query": "timeseries ocb_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "gapPolicy": "gap",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "relative",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "curve": "linear",
+                    "pointsDisplay": "auto",
+                    "categoricalBarChartSettings": {
+                        "layout": "horizontal",
+                        "categoryAxisTickLayout": "horizontal",
+                        "scale": "absolute",
+                        "groupMode": "stacked",
+                        "colorPaletteMode": "multi-color",
+                        "valueAxisScale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "valueRepresentation": "absolute",
+                    "truncationMode": "middle",
+                    "xAxisScaling": "analyzedTimeframe",
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "hiddenLegendFields": [],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "ocb_collector",
+                            "contrib_collector"
+                        ]
+                    },
+                    "leftYAxisSettings": {},
+                    "bandChartSettings": {
+                        "lower": "ocb_collector",
+                        "upper": "contrib_collector"
+                    }
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "",
+                    "prefixIcon": "AnalyticsIcon",
+                    "isIconVisible": false,
+                    "autoscale": true,
+                    "alignment": "center",
+                    "colorThresholdTarget": "value"
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "linewrapEnabled": false,
+                    "lineWrapIds": [],
+                    "monospacedFontEnabled": false,
+                    "monospacedFontColumns": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "contrib_collector"
+                            ],
+                            "value": "sparkline",
+                            "id": 1742394593857
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto",
+                        "ratio": "auto"
+                    },
+                    "dataMappings": {},
+                    "displayedFields": [],
+                    "truncationMode": "middle",
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": {
+                        "position": "auto"
+                    },
+                    "yAxis": {
+                        "label": "Frequency",
+                        "isLabelVisible": true,
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [],
+                    "variant": "single",
+                    "truncationMode": "middle"
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "autoSelectVisualization": true
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 1,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {
+                "enabled": false,
+                "davisVisualization": {
+                    "isAvailable": true
+                }
+            }
         }
     },
     "layouts": {
@@ -972,29 +1094,17 @@
             "w": 10,
             "h": 6
         },
-        "8": {
-            "x": 0,
-            "y": 6,
-            "w": 20,
-            "h": 8
-        },
         "9": {
             "x": 0,
-            "y": 14,
-            "w": 20,
-            "h": 7
+            "y": 6,
+            "w": 24,
+            "h": 9
         },
         "10": {
             "x": 0,
-            "y": 21,
-            "w": 8,
-            "h": 6
-        },
-        "11": {
-            "x": 9,
-            "y": 21,
-            "w": 8,
-            "h": 6
+            "y": 15,
+            "w": 12,
+            "h": 8
         },
         "12": {
             "x": 10,
@@ -1004,17 +1114,43 @@
         },
         "13": {
             "x": 0,
-            "y": 27,
-            "w": 18,
-            "h": 7
+            "y": 31,
+            "w": 12,
+            "h": 8
         },
         "14": {
             "x": 0,
-            "y": 34,
-            "w": 18,
-            "h": 7
+            "y": 23,
+            "w": 12,
+            "h": 8
+        },
+        "15": {
+            "x": 12,
+            "y": 23,
+            "w": 12,
+            "h": 8
+        },
+        "16": {
+            "x": 12,
+            "y": 15,
+            "w": 12,
+            "h": 8
+        },
+        "17": {
+            "x": 12,
+            "y": 31,
+            "w": 12,
+            "h": 8
         }
     },
     "importedWithCode": false,
-    "settings": {}
+    "settings": {
+        "defaultTimeframe": {
+            "value": {
+                "from": "now()-2h",
+                "to": "now()"
+            },
+            "enabled": false
+        }
+    }
 }
