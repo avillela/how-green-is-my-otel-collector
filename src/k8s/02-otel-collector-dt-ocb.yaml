@@ -53,7 +53,7 @@ spec:
           scrape_configs:
             # Collector metrics
             - job_name: 'otel-collector'
-              scrape_interval: 5s
+              scrape_interval: 10s
               static_configs:
               - targets: [ '0.0.0.0:8888' ]
 

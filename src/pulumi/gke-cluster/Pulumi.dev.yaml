@@ -1,5 +1,5 @@
 config:
-  gcp:project: indycomp0t1
+  gcp:project: indycomp0t1-v2
   gcp:region: us-east1
   gcp:zone: us-east1-c
 
