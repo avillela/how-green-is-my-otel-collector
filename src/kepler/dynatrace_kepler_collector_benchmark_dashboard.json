@@ -7,7 +7,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-26T13:53",
+            "input": "2025-03-26T13:53,2025-03-26T16:36",
             "multiple": false
         },
         {
@@ -16,7 +16,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-26T12:50",
+            "input": "2025-03-26T14:46",
             "multiple": false
         },
         {
@@ -25,7 +25,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-26T13:22",
+            "input": "2025-03-26T13:22,2025-03-26T15:40",
             "multiple": false
         },
         {
@@ -231,7 +231,7 @@
                                 "contrib_collector_kwh"
                             ],
                             "value": "sparkline",
-                            "id": 1743011716546
+                            "id": 1743014896433
                         }
                     ]
                 },
@@ -368,7 +368,7 @@
                                 "contrib_collector_kwh"
                             ],
                             "value": "sparkline",
-                            "id": 1743011389481
+                            "id": 1743014813883
                         }
                     ]
                 },
@@ -618,7 +618,7 @@
                                 "contrib_collector_memory"
                             ],
                             "value": "sparkline",
-                            "id": 1743011529769
+                            "id": 1743014819898
                         }
                     ]
                 },
@@ -756,7 +756,7 @@
                                 "contrib_collector"
                             ],
                             "value": "sparkline",
-                            "id": 1743011896017
+                            "id": 1743014817464
                         }
                     ]
                 },
@@ -893,7 +893,7 @@
                                 "contrib_collector"
                             ],
                             "value": "sparkline",
-                            "id": 1743011752976
+                            "id": 1743014817437
                         }
                     ]
                 },
@@ -1043,7 +1043,7 @@
                                 "contrib_collector_kwh"
                             ],
                             "value": "sparkline",
-                            "id": 1743011142398
+                            "id": 1743014813952
                         }
                     ]
                 },
@@ -1103,9 +1103,9 @@
             }
         },
         "17": {
-            "title": "Memory Allocated for Heap - Contrib Collectors vs OCB Collector",
+            "title": "Memory Allocated for Heap - Separate Contrib Collectors vs Single Collector",
             "type": "data",
-            "query": "timeseries ocb_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
+            "query": "timeseries separate_contrib_collectors = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
@@ -1148,13 +1148,13 @@
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
-                            "ocb_collector",
+                            "separate_contrib_collectors",
                             "contrib_collector"
                         ]
                     },
                     "leftYAxisSettings": {},
                     "bandChartSettings": {
-                        "lower": "ocb_collector",
+                        "lower": "separate_contrib_collectors",
                         "upper": "contrib_collector"
                     }
                 },
@@ -1182,7 +1182,7 @@
                                 "contrib_collector"
                             ],
                             "value": "sparkline",
-                            "id": 1743011466825
+                            "id": 1743014819853
                         }
                     ]
                 },
