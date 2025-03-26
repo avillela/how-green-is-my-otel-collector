@@ -45,14 +45,6 @@ spec:
               static_configs:
               - targets: [ '0.0.0.0:8888' ]
 
-      # Logs - Pull k8s objects at given interval, and produce logs
-      k8sobjects:
-        auth_type: serviceAccount
-        objects:
-          - name: pods
-            mode: pull
-            interval: 30m
-
       # Collects cluster-level metrics and entity events from the Kubernetes API server
       k8s_cluster:
         node_conditions_to_report: [ Ready, MemoryPressure ]
@@ -79,42 +71,6 @@ spec:
         limit_percentage: 70
         spike_limit_percentage: 30
 
-      # Modifies telemetry based on configuration using the OpenTelemetry Transformation Language (OTTL)
-      # This particular transform processor configuration k8s attributes to Dynatrace attributes
-      transform:
-        error_mode: ignore
-        log_statements:
-          - context: resource
-            statements:
-              - set(attributes["dt.kubernetes.workload.kind"], "statefulset") where IsString(attributes["k8s.statefulset.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.statefulset.name"]) where IsString(attributes["k8s.statefulset.name"])
-              - set(attributes["dt.kubernetes.workload.kind"], "deployment") where IsString(attributes["k8s.deployment.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.deployment.name"]) where IsString(attributes["k8s.deployment.name"])
-              - set(attributes["dt.kubernetes.workload.kind"], "daemonset") where IsString(attributes["k8s.daemonset.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.daemonset.name"]) where IsString(attributes["k8s.daemonset.name"])
-              - set(attributes["dt.kubernetes.cluster.id"], attributes["k8s.cluster.uid"]) where IsString(attributes["k8s.cluster.uid"])
-    
-        metric_statements:
-          - context: resource
-            statements:
-              - set(attributes["dt.kubernetes.workload.kind"], "statefulset") where IsString(attributes["k8s.statefulset.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.statefulset.name"]) where IsString(attributes["k8s.statefulset.name"])
-              - set(attributes["dt.kubernetes.workload.kind"], "deployment") where IsString(attributes["k8s.deployment.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.deployment.name"]) where IsString(attributes["k8s.deployment.name"])
-              - set(attributes["dt.kubernetes.workload.kind"], "daemonset") where IsString(attributes["k8s.daemonset.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.daemonset.name"]) where IsString(attributes["k8s.daemonset.name"])
-              - set(attributes["dt.kubernetes.cluster.id"], attributes["k8s.cluster.uid"]) where IsString(attributes["k8s.cluster.uid"])
-        trace_statements:
-          - context: resource
-            statements:
-              - set(attributes["dt.kubernetes.workload.kind"], "statefulset") where IsString(attributes["k8s.statefulset.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.statefulset.name"]) where IsString(attributes["k8s.statefulset.name"])
-              - set(attributes["dt.kubernetes.workload.kind"], "deployment") where IsString(attributes["k8s.deployment.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.deployment.name"]) where IsString(attributes["k8s.deployment.name"])
-              - set(attributes["dt.kubernetes.workload.kind"], "daemonset") where IsString(attributes["k8s.daemonset.name"])
-              - set(attributes["dt.kubernetes.workload.name"], attributes["k8s.daemonset.name"]) where IsString(attributes["k8s.daemonset.name"])
-              - set(attributes["dt.kubernetes.cluster.id"], attributes["k8s.cluster.uid"]) where IsString(attributes["k8s.cluster.uid"])
-
       # Convert Prometheus metrics names to OTel metrics names
       transform/metrics:
         error_mode: ignore
@@ -124,27 +80,6 @@ spec:
                 - set(attributes["k8s.container.name"], attributes["container_name"]) where attributes["container_name"] != nil
                 - set(attributes["k8s.pod.name"], attributes["pod_name"]) where attributes["pod_name"] != nil
                 - set(attributes["k8s.namespace.name"], attributes["container_namespace"]) where attributes["container_namespace"] != nil      
-
-
-      # Extract fields from k8s objects from log lines
-      transform/k8s:
-        error_mode: ignore
-        log_statements:
-          - context: log
-            statements:
-              - merge_maps(cache, body, "upsert")
-              - set(attributes["k8s.object.kind"], cache["kind"]) where cache["kind"] != nil
-              - merge_maps(cache,cache["metadata"], "upsert") where cache["metadata"] != nil
-              - set(attributes["k8s.namespace.name"], cache["namespace"]) where cache["namespace"] != nil
-              - merge_maps(cache,ExtractPatterns(String(cache["ownerReferences"]),"^.*kind\\\":\\\"(?P<kindowner>[^\"]*)\".*name\\\":\\\"(?P<nameowner>[^\"]*)\\\".*$"), "upsert") where cache["ownerReferences"] != nil
-              - set(attributes["dt.kubernetes.workload.kind"], ConvertCase( cache["kindowner"], "lower") ) where cache["kindowner"] != nil
-              - set(attributes["dt.kubernetes.workload.name"], cache["nameowner"]) where cache["nameowner"] != nil
-              - set(attributes["k8s.object.labels"], cache["labels"]) where cache["labels"] != nil
-              - set(attributes["k8s.pod.name"], cache["name"]) where cache["name"] != nil
-              - merge_maps(cache,cache["spec"], "upsert") where cache["spec"] != nil
-              - set(attributes["k8s.object.nodeselector"], String(cache["nodeSelector"])) where cache["nodeSelector"]!= nil
-              - set(attributes["k8s.node.name"], cache["nodeName"]) where cache["nodeName"]!= nil
-              - set(attributes["k8s.status"],cache["status"]) where cache["status"] != nil
 
       # Enriches traces, logs, and metrics with k8s attributes
       # The processor automatically discovers k8s resources (pods), extracts metadata from them and adds the 
@@ -204,15 +139,15 @@ spec:
       pipelines:
         traces:
           receivers: [ otlp ]
-          processors: [ memory_limiter, k8sattributes, transform, batch ]
+          processors: [ memory_limiter, k8sattributes, batch ]
           exporters: [ otlp/jaeger, debug ]
         metrics:
           receivers: [ otlp ]
-          processors: [ memory_limiter, transform/metrics, k8sattributes, transform, batch ]
+          processors: [ memory_limiter, transform/metrics, k8sattributes, batch ]
           exporters: [ debug ]
         logs:
           receivers: [ otlp ]
-          processors: [ memory_limiter, k8sattributes, transform, batch ]
+          processors: [ memory_limiter, k8sattributes, batch ]
           exporters: [ debug ]
 
         # These pipelines are specific to our Kepler setup. We have separate pipelines so that we don't "pollute" OTel
@@ -220,9 +155,4 @@ spec:
         metrics/prom:
           receivers: [ prometheus, k8s_cluster, kubeletstats ]
           processors: [ memory_limiter, transform/metrics, k8sattributes/k8s, batch ]
-          exporters: [ debug ]
-
-        logs/k8s:
-          receivers: [ k8sobjects ]
-          processors: [ memory_limiter, transform/k8s, k8sattributes/k8s, resource, batch ]
           exporters: [ debug ]

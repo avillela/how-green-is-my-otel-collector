@@ -6,14 +6,16 @@
             "type": "query",
             "input": "fetch logs\n|summarize count() , by: {k8s.namespace.name}\n| fieldsKeep k8s.namespace.name\n",
             "multiple": false,
-            "visible": true
+            "visible": true,
+            "version": 1
         },
         {
             "key": "podname",
             "type": "query",
             "visible": true,
             "input": "fetch logs\n|summarize count() , by: {k8s.pod.name}\n| fieldsKeep k8s.pod.name",
-            "multiple": false
+            "multiple": false,
+            "version": 1
         }
     ],
     "tiles": {
@@ -25,7 +27,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
-                    "xAxisScaling": "analyzedTimeframe",
+                    "xAxisScaling": "auto",
                     "gapPolicy": "connect",
                     "circleChartSettings": {
                         "groupingThresholdType": "absolute"
@@ -120,7 +122,9 @@
                         }
                     ],
                     "variant": "single",
-                    "displayedFields": []
+                    "displayedFields": [
+                        "container_namespace"
+                    ]
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -162,7 +166,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
-                    "xAxisScaling": "analyzedTimeframe",
+                    "xAxisScaling": "auto",
                     "gapPolicy": "connect",
                     "circleChartSettings": {
                         "groupingThresholdType": "absolute"
@@ -257,7 +261,9 @@
                         }
                     ],
                     "variant": "single",
-                    "displayedFields": []
+                    "displayedFields": [
+                        "container_namespace"
+                    ]
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -299,7 +305,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
-                    "xAxisScaling": "analyzedTimeframe",
+                    "xAxisScaling": "auto",
                     "gapPolicy": "connect",
                     "circleChartSettings": {
                         "groupingThresholdType": "absolute"
@@ -394,7 +400,9 @@
                         }
                     ],
                     "variant": "single",
-                    "displayedFields": []
+                    "displayedFields": [
+                        "container_namespace"
+                    ]
                 },
                 "valueBoundaries": {
                     "min": "auto",
