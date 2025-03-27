@@ -1,5 +1,5 @@
 {
-    "version": 18,
+    "version": 17,
     "variables": [
         {
             "key": "ocbCollectorStartTime",
@@ -7,7 +7,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-14T00:30,2025-03-17T12:10,2025-03-18T10:33,2025-03-18T15:57,2025-03-19T11:47,2025-03-21T13:22",
+            "input": "2025-03-26T13:53,2025-03-26T16:36",
             "multiple": false
         },
         {
@@ -16,7 +16,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-12T16:04,2025-03-17T13:24,2025-03-18T12:39,2025-03-18T18:54,2025-03-19T10:38,2025-03-21T12:15",
+            "input": "2025-03-26T14:46",
             "multiple": false
         },
         {
@@ -25,7 +25,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "2025-03-13T10:46,2025-03-17T14:39,2025-03-18T14:11,2025-03-18T17:49,2025-03-19T12:56",
+            "input": "2025-03-26T13:22,2025-03-26T15:40",
             "multiple": false
         },
         {
@@ -34,7 +34,7 @@
             "type": "csv",
             "version": 1,
             "editable": true,
-            "input": "60",
+            "input": "15,30,60",
             "multiple": false
         }
     ],
@@ -47,6 +47,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -62,7 +63,16 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "ratio"
+                        ],
+                        "categoryAxisLabel": "ratio",
+                        "valueAxis": [
+                            "ratio"
+                        ],
+                        "valueAxisLabel": "ratio",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
@@ -111,9 +121,15 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "ratio",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -143,6 +159,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "auto",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -158,26 +175,36 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "interval",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "xAxisScaling": "auto",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
                     "leftYAxisSettings": {},
-                    "bandChartSettings": {
-                        "lower": "ocb_collector_kwh",
-                        "upper": "contrib_collector_kwh"
-                    },
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
                             "ocb_collector_kwh",
                             "contrib_collector_kwh"
                         ]
+                    },
+                    "bandChartSettings": {
+                        "lower": "ocb_collector_kwh",
+                        "upper": "contrib_collector_kwh"
                     }
                 },
                 "singleValue": {
@@ -204,7 +231,7 @@
                                 "contrib_collector_kwh"
                             ],
                             "value": "sparkline",
-                            "id": 1742325978263
+                            "id": 1743014896433
                         }
                     ]
                 },
@@ -231,9 +258,15 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -258,11 +291,12 @@
         "10": {
             "title": "Separate Contrib (Combined) Collectors vs Single Contrib Collector (kWh)",
             "type": "data",
-            "query": "timeseries separate_contrib_collectors_joulerate = sum(kepler_container_joules_total, rate:1m), filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
+            "query": "timeseries separate_contrib_collectors_joulerate = sum(kepler_container_joules_total, rate:1m), filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]  ",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "auto",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -278,19 +312,25 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "interval",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "bandChartSettings": {
-                        "lower": "separate_contrib_collectors_kwh",
-                        "upper": "contrib_collector_kwh"
-                    },
-                    "xAxisScaling": "auto",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
@@ -298,7 +338,11 @@
                             "contrib_collector_kwh"
                         ]
                     },
-                    "leftYAxisSettings": {}
+                    "leftYAxisSettings": {},
+                    "bandChartSettings": {
+                        "lower": "separate_contrib_collectors_kwh",
+                        "upper": "contrib_collector_kwh"
+                    }
                 },
                 "singleValue": {
                     "showLabel": true,
@@ -324,7 +368,7 @@
                                 "contrib_collector_kwh"
                             ],
                             "value": "sparkline",
-                            "id": 1742314257368
+                            "id": 1743014813883
                         }
                     ]
                 },
@@ -351,9 +395,15 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -383,6 +433,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "analyzedTimeframe",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -398,7 +449,16 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "ratio"
+                        ],
+                        "categoryAxisLabel": "ratio",
+                        "valueAxis": [
+                            "ratio"
+                        ],
+                        "valueAxisLabel": "ratio",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
@@ -447,9 +507,15 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "ratio",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -479,6 +545,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "auto",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -494,15 +561,25 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "interval",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "xAxisScaling": "analyzedTimeframe",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
@@ -511,130 +588,9 @@
                         ]
                     },
                     "leftYAxisSettings": {},
+                    "seriesOverrides": [],
                     "bandChartSettings": {
                         "lower": "separate_contrib_collectors_memory",
-                        "upper": "contrib_collector_memory"
-                    },
-                    "seriesOverrides": []
-                },
-                "singleValue": {
-                    "showLabel": true,
-                    "label": "",
-                    "prefixIcon": "AnalyticsIcon",
-                    "isIconVisible": false,
-                    "autoscale": true,
-                    "alignment": "center",
-                    "colorThresholdTarget": "value"
-                },
-                "table": {
-                    "rowDensity": "condensed",
-                    "enableSparklines": false,
-                    "hiddenColumns": [],
-                    "linewrapEnabled": false,
-                    "lineWrapIds": [],
-                    "monospacedFontEnabled": false,
-                    "monospacedFontColumns": [],
-                    "columnWidths": {},
-                    "columnTypeOverrides": [
-                        {
-                            "fields": [
-                                "contrib_collector_memory"
-                            ],
-                            "value": "sparkline",
-                            "id": 1742571289411
-                        }
-                    ]
-                },
-                "honeycomb": {
-                    "shape": "hexagon",
-                    "legend": {
-                        "hidden": false,
-                        "position": "auto",
-                        "ratio": "auto"
-                    },
-                    "dataMappings": {},
-                    "displayedFields": [],
-                    "truncationMode": "middle",
-                    "colorMode": "color-palette",
-                    "colorPalette": "categorical"
-                },
-                "histogram": {
-                    "legend": {
-                        "position": "auto"
-                    },
-                    "yAxis": {
-                        "label": "Frequency",
-                        "isLabelVisible": true,
-                        "scale": "linear"
-                    },
-                    "colorPalette": "categorical",
-                    "dataMappings": [],
-                    "variant": "single",
-                    "truncationMode": "middle"
-                },
-                "valueBoundaries": {
-                    "min": "auto",
-                    "max": "auto"
-                },
-                "autoSelectVisualization": true,
-                "unitsOverrides": []
-            },
-            "querySettings": {
-                "maxResultRecords": 1000,
-                "defaultScanLimitGbytes": 500,
-                "maxResultMegaBytes": 1,
-                "defaultSamplingRatio": 10,
-                "enableSampling": false
-            },
-            "davis": {
-                "enabled": false,
-                "davisVisualization": {
-                    "isAvailable": true
-                }
-            }
-        },
-        "14": {
-            "title": "RSS Memory - Contrib Collectors vs OCB Collector",
-            "type": "data",
-            "query": "timeseries ocb_collectors_memory = avg(otelcol_process_memory_rss), from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector_memory = avg(otelcol_process_memory_rss), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector_memory,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
-            "visualization": "lineChart",
-            "visualizationSettings": {
-                "thresholds": [],
-                "chartSettings": {
-                    "gapPolicy": "gap",
-                    "circleChartSettings": {
-                        "groupingThresholdType": "relative",
-                        "groupingThresholdValue": 0,
-                        "valueType": "relative"
-                    },
-                    "categoryOverrides": {},
-                    "curve": "linear",
-                    "pointsDisplay": "auto",
-                    "categoricalBarChartSettings": {
-                        "layout": "horizontal",
-                        "categoryAxisTickLayout": "horizontal",
-                        "scale": "absolute",
-                        "groupMode": "stacked",
-                        "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
-                    },
-                    "colorPalette": "categorical",
-                    "valueRepresentation": "absolute",
-                    "truncationMode": "middle",
-                    "xAxisScaling": "analyzedTimeframe",
-                    "xAxisLabel": "timeframe",
-                    "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
-                    "fieldMapping": {
-                        "timestamp": "timeframe",
-                        "leftAxisValues": [
-                            "ocb_collectors_memory",
-                            "contrib_collector_memory"
-                        ]
-                    },
-                    "leftYAxisSettings": {},
-                    "bandChartSettings": {
-                        "lower": "ocb_collectors_memory",
                         "upper": "contrib_collector_memory"
                     }
                 },
@@ -662,7 +618,7 @@
                                 "contrib_collector_memory"
                             ],
                             "value": "sparkline",
-                            "id": 1742337920349
+                            "id": 1743014819898
                         }
                     ]
                 },
@@ -689,9 +645,153 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
+                },
+                "valueBoundaries": {
+                    "min": "auto",
+                    "max": "auto"
+                },
+                "autoSelectVisualization": true,
+                "unitsOverrides": []
+            },
+            "querySettings": {
+                "maxResultRecords": 1000,
+                "defaultScanLimitGbytes": 500,
+                "maxResultMegaBytes": 1,
+                "defaultSamplingRatio": 10,
+                "enableSampling": false
+            },
+            "davis": {
+                "enabled": false,
+                "davisVisualization": {
+                    "isAvailable": true
+                }
+            }
+        },
+        "14": {
+            "title": "RSS Memory - Contrib Collectors vs OCB Collector",
+            "type": "data",
+            "query": "timeseries ocb_collector = avg(otelcol_process_memory_rss), from:toTimestamp($ocbCollectorStartTime), to:toTimestamp($ocbCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_memory_rss), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($ocbCollectorStartTime), to:  toTimestamp($ocbCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
+            "visualization": "lineChart",
+            "visualizationSettings": {
+                "thresholds": [],
+                "chartSettings": {
+                    "xAxisScaling": "auto",
+                    "gapPolicy": "gap",
+                    "circleChartSettings": {
+                        "groupingThresholdType": "relative",
+                        "groupingThresholdValue": 0,
+                        "valueType": "relative"
+                    },
+                    "categoryOverrides": {},
+                    "curve": "linear",
+                    "pointsDisplay": "auto",
+                    "categoricalBarChartSettings": {
+                        "layout": "horizontal",
+                        "categoryAxisTickLayout": "horizontal",
+                        "scale": "absolute",
+                        "groupMode": "stacked",
+                        "colorPaletteMode": "multi-color",
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "interval",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
+                    },
+                    "colorPalette": "categorical",
+                    "valueRepresentation": "absolute",
+                    "truncationMode": "middle",
+                    "xAxisLabel": "timeframe",
+                    "xAxisIsLabelVisible": false,
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
+                    "fieldMapping": {
+                        "timestamp": "timeframe",
+                        "leftAxisValues": [
+                            "ocb_collector",
+                            "contrib_collector"
+                        ]
+                    },
+                    "leftYAxisSettings": {},
+                    "bandChartSettings": {
+                        "lower": "ocb_collector",
+                        "upper": "contrib_collector"
+                    }
+                },
+                "singleValue": {
+                    "showLabel": true,
+                    "label": "",
+                    "prefixIcon": "AnalyticsIcon",
+                    "isIconVisible": false,
+                    "autoscale": true,
+                    "alignment": "center",
+                    "colorThresholdTarget": "value"
+                },
+                "table": {
+                    "rowDensity": "condensed",
+                    "enableSparklines": false,
+                    "hiddenColumns": [],
+                    "linewrapEnabled": false,
+                    "lineWrapIds": [],
+                    "monospacedFontEnabled": false,
+                    "monospacedFontColumns": [],
+                    "columnWidths": {},
+                    "columnTypeOverrides": [
+                        {
+                            "fields": [
+                                "contrib_collector"
+                            ],
+                            "value": "sparkline",
+                            "id": 1743014817464
+                        }
+                    ]
+                },
+                "honeycomb": {
+                    "shape": "hexagon",
+                    "legend": {
+                        "hidden": false,
+                        "position": "auto",
+                        "ratio": "auto"
+                    },
+                    "dataMappings": {},
+                    "displayedFields": [],
+                    "truncationMode": "middle",
+                    "colorMode": "color-palette",
+                    "colorPalette": "categorical"
+                },
+                "histogram": {
+                    "legend": {
+                        "position": "auto"
+                    },
+                    "yAxis": {
+                        "label": "Frequency",
+                        "isLabelVisible": true,
+                        "scale": "linear"
+                    },
+                    "colorPalette": "categorical",
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
+                    "variant": "single",
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -721,6 +821,7 @@
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "auto",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -736,15 +837,25 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "interval",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "xAxisScaling": "analyzedTimeframe",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
@@ -782,7 +893,7 @@
                                 "contrib_collector"
                             ],
                             "value": "sparkline",
-                            "id": 1742394593857
+                            "id": 1743014817437
                         }
                     ]
                 },
@@ -809,9 +920,15 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -836,11 +953,12 @@
         "16": {
             "title": "Separate Contrib Collectors vs Single Contrib Collector (kWh)",
             "type": "data",
-            "query": "timeseries separate_contrib_collectors_joulerate = sum(kepler_container_joules_total, rate:1m), by:{k8s.pod.name}, filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n  ]",
+            "query": "timeseries separate_contrib_collectors_joulerate = sum(kepler_container_joules_total, rate:1m), by:{k8s.pod.name}, filter: {in (k8s.pod.name, \"otelcol-collector-0\", \"otelcol-k8s-collector-0\")}, from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n  | fieldsAdd separate_contrib_collectors_kwh=separate_contrib_collectors_joulerate[]*3600\n  | fieldsRemove separate_contrib_collectors_joulerate\n| append [\ntimeseries contrib_collector_joulerate = sum(kepler_container_joules_total, rate:1m) , filter: {in (k8s.pod.name, \"otelcol-collector-0\")}, from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration),unit:\"min\")\n  | fieldsAdd contrib_collector_kwh=contrib_collector_joulerate[]*3600\n  | fields contrib_collector_kwh,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "auto",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -856,19 +974,25 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "k8s.pod.name"
+                        ],
+                        "categoryAxisLabel": "k8s.pod.name",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "bandChartSettings": {
-                        "lower": "separate_contrib_collectors_kwh",
-                        "upper": "contrib_collector_kwh"
-                    },
-                    "xAxisScaling": "auto",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
@@ -889,7 +1013,11 @@
                                 }
                             }
                         }
-                    ]
+                    ],
+                    "bandChartSettings": {
+                        "lower": "separate_contrib_collectors_kwh",
+                        "upper": "contrib_collector_kwh"
+                    }
                 },
                 "singleValue": {
                     "showLabel": true,
@@ -915,7 +1043,7 @@
                                 "contrib_collector_kwh"
                             ],
                             "value": "sparkline",
-                            "id": 1742314257368
+                            "id": 1743014813952
                         }
                     ]
                 },
@@ -942,9 +1070,17 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": [
+                        "k8s.pod.name"
+                    ]
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -967,13 +1103,14 @@
             }
         },
         "17": {
-            "title": "Memory Allocated for Heap - Contrib Collectors vs OCB Collector",
+            "title": "Memory Allocated for Heap - Separate Contrib Collectors vs Single Collector",
             "type": "data",
-            "query": "timeseries ocb_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
+            "query": "timeseries separate_contrib_collectors = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($splitContribCollectorStartTime), to:toTimestamp($splitContribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| append [\ntimeseries contrib_collector = avg(otelcol_process_runtime_heap_alloc_bytes), from:toTimestamp($contribCollectorStartTime), to:toTimestamp($contribCollectorStartTime) + duration(toLong($duration), unit:\"min\")\n| fields contrib_collector,interval,timeframe=timeframe(from:  toTimestamp($splitContribCollectorStartTime), to:  toTimestamp($splitContribCollectorStartTime) +  duration(toLong($duration),unit:\"min\"))\n]",
             "visualization": "lineChart",
             "visualizationSettings": {
                 "thresholds": [],
                 "chartSettings": {
+                    "xAxisScaling": "auto",
                     "gapPolicy": "gap",
                     "circleChartSettings": {
                         "groupingThresholdType": "relative",
@@ -989,25 +1126,35 @@
                         "scale": "absolute",
                         "groupMode": "stacked",
                         "colorPaletteMode": "multi-color",
-                        "valueAxisScale": "linear"
+                        "valueAxisScale": "linear",
+                        "categoryAxis": [
+                            "interval"
+                        ],
+                        "categoryAxisLabel": "interval",
+                        "valueAxis": [
+                            "interval"
+                        ],
+                        "valueAxisLabel": "interval",
+                        "tooltipVariant": "single"
                     },
                     "colorPalette": "categorical",
                     "valueRepresentation": "absolute",
                     "truncationMode": "middle",
-                    "xAxisScaling": "analyzedTimeframe",
                     "xAxisLabel": "timeframe",
                     "xAxisIsLabelVisible": false,
-                    "hiddenLegendFields": [],
+                    "hiddenLegendFields": [
+                        "interval"
+                    ],
                     "fieldMapping": {
                         "timestamp": "timeframe",
                         "leftAxisValues": [
-                            "ocb_collector",
+                            "separate_contrib_collectors",
                             "contrib_collector"
                         ]
                     },
                     "leftYAxisSettings": {},
                     "bandChartSettings": {
-                        "lower": "ocb_collector",
+                        "lower": "separate_contrib_collectors",
                         "upper": "contrib_collector"
                     }
                 },
@@ -1035,7 +1182,7 @@
                                 "contrib_collector"
                             ],
                             "value": "sparkline",
-                            "id": 1742394593857
+                            "id": 1743014819853
                         }
                     ]
                 },
@@ -1062,9 +1209,15 @@
                         "scale": "linear"
                     },
                     "colorPalette": "categorical",
-                    "dataMappings": [],
+                    "dataMappings": [
+                        {
+                            "valueAxis": "interval",
+                            "rangeAxis": ""
+                        }
+                    ],
                     "variant": "single",
-                    "truncationMode": "middle"
+                    "truncationMode": "middle",
+                    "displayedFields": []
                 },
                 "valueBoundaries": {
                     "min": "auto",
@@ -1147,7 +1300,7 @@
     "settings": {
         "defaultTimeframe": {
             "value": {
-                "from": "now()-2h",
+                "from": "-2h",
                 "to": "now()"
             },
             "enabled": false

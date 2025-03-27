@@ -16,11 +16,6 @@ spec:
   serviceAccount: otelcontribcol
   targetAllocator:
     enabled: false
-    serviceAccount: opentelemetry-targetallocator-sa
-    prometheusCR:
-      enabled: true
-      podMonitorSelector: {}
-      serviceMonitorSelector: {}
   env:
     - name: DT_TOKEN
       valueFrom:
@@ -46,40 +41,6 @@ spec:
         protocols:
           grpc: {}
           http: {}
-
-      prometheus:
-        config:
-          scrape_configs:
-            # Collector metrics
-            - job_name: 'otel-collector'
-              scrape_interval: 10s
-              static_configs:
-              - targets: [ '0.0.0.0:8888' ]
-
-      # Logs - Pull k8s objects at given interval, and produce logs
-      k8sobjects:
-        auth_type: serviceAccount
-        objects:
-          - name: pods
-            mode: pull
-            interval: 30m
-
-      # Collects cluster-level metrics and entity events from the Kubernetes API server
-      k8s_cluster:
-        node_conditions_to_report: [ Ready, MemoryPressure ]
-        allocatable_types_to_report: [ cpu, memory, storage ]
-        resource_attributes:
-          container.id:
-            enabled: false
-
-      # This does the same thing as the Prometheus kube-state-metrics exporter
-      # Reference: https://github.com/kubernetes/kube-state-metrics
-      # Pulls node, pod, container, and volume metrics from the API server on a kubelet
-      kubeletstats:
-        collection_interval: 20s
-        auth_type: "serviceAccount"
-        endpoint: "https://${env:K8S_NODE_NAME}:10250"
-        insecure_skip_verify: true
 
     processors:
       # Required for Dynatrace metrics processing
@@ -187,17 +148,6 @@ spec:
           - sources:
               - from: connection
 
-
-      # Enriches metrics (because we put in metrics pipeline only) with k8s attributes
-      k8sattributes/k8s:
-        extract:
-          metadata:
-            - k8s.cluster.uid
-            - k8s.node.name
-        pod_association:
-          - sources:
-              - from: connection
-
       # Apply changes on resource attributes
       resource:
         attributes:
@@ -212,8 +162,8 @@ spec:
         tls:
           insecure: true
       otlphttp/dt:
-        # endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
-        endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
+        endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
+        # endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
         headers:
           Authorization: "Api-Token ${DT_TOKEN}"
       debug:

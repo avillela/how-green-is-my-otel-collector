@@ -1,7 +1,7 @@
 config:
-  gcp:project: indycomp0t1-v2
-  gcp:region: us-east1
-  gcp:zone: us-east1-c
+  gcp:project: <my_gcp_project_name>
+  gcp:region: <my_gcp_region>
+  gcp:zone: <my_gcp_zone>
 
   kepler-gke-cluster:cluster_name: gke-kepler
   kepler-gke-cluster:disk_size_gb: "30"
