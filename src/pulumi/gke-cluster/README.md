@@ -29,6 +29,23 @@ pulumi new https://github.com/avillela/how-green-is-my-otel-collector \
     -d "Provision a GKE cluster" -y --force
 ```
 
+Update the stack file, [`Pulumi.dev.yaml`](Pulumi.dev.yaml) with your own GCP environment info. The snippet below shows what fields you need to update in `Pulumil.dev.yaml`:
+
+```yaml
+config:
+  gcp:project: <my_gcp_project_name>
+  gcp:region: <my_gcp_region>
+  gcp:zone: <my_gcp_zone>
+```
+
+* `<my_gcp_project_name>`: Your GCP project name
+* `<my_gcp_region>`: Your GCP region
+* `<my_gcp_zone>`: Your GCP zone.
+
+To get a list of GCP compute zones, run `gcloud compute zones list` on the command line.
+
+To get alist of available projects for your account, run `gcloud projects list` on the command line.
+
 Initialize and select the `dev` stack.
 
 ```bash
