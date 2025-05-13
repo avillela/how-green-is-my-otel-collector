@@ -1,0 +1,11 @@
+# Check out list of time zones: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+apiVersion: kube-green.com/v1alpha1
+kind: SleepInfo
+metadata:
+  name: sleep-python-example
+  namespace: opentelemetry
+spec:
+  weekdays: "*"
+  sleepAt: "16:51"
+  wakeUpAt: "16:54"
+  timeZone: "America/Toronto"

@@ -196,7 +196,7 @@ GH_USERNAME="<your_github_username>"
 ./src/scripts/04-build-and-publish-images.sh $GH_TOKEN $GH_USERNAME
 ```
 
-### 5- Deploy the Kubernetes
+### 5- Deploy to Kubernetes
 
 This will deploy the exmaple Python code (client and server app), plus a Python app that emits Prometheus-style metrics. It will also deploy an `OpenTelemetryCollector` resource, which deploys an OpenTelmetry Collector and Target Allocator.
 
@@ -254,6 +254,13 @@ Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power co
 
 ![Grafana Kepler Dashboard](/images/grafana-dashboard-kepler.png)
 
+### 6- Deploy kube-green
+
+Install kube-green
+
+```bash
+./src/scripts/06-install-kube-green.sh
+```
 
 ## Useful Commands
 
@@ -282,3 +289,14 @@ List metrics (mostly):
 ```bash
 kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 ```
+
+## Resources & References
+
+* [Engineers often need a lot of water to keep data centers cool](https://www.asce.org/publications-and-news/civil-engineering-source/civil-engineering-magazine/issues/magazine-issue/article/2024/03/engineers-often-need-a-lot-of-water-to-keep-data-centers-cool)
+* [kube-green (article on Medium)](https://medium.com/@rahul.mam/kube-green-c04358881a2f)
+* [Kube-green: An operator to reduce CO2 footprint of your kubernetes clusters (article on Medium)](https://purushothamkdr453.medium.com/kube-green-an-operator-to-reduce-co2-footprint-of-your-clusters-b09643eb9ed2)
+* [Keeping the Cloud Green with the kube-green Operator on OpenShift](https://www.redhat.com/en/blog/keeping-the-cloud-green-with-the-kube-green-operator-on-openshift)
+* [Green Reviews Working Group: Moving towards measuring the sustainability footprint of CNCF projects](https://tag-env-sustainability.cncf.io/blog/2024-green-reviews-working-group-measuring-sustainability/)
+* [green-reviews-tooling (repository on GitHub)](https://github.com/cncf-tags/green-reviews-tooling?tab=readme-ov-file)
+* [Observe & Resolve: KubeGreen (repository on GitHub)](https://github.com/Observe-Resolve/kubegreen/blob/master/deployment.sh)
+* [Kube-Green Project](https://kube-green.dev/docs/getting-started/)

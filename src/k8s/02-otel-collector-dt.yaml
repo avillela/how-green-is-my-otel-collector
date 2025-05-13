@@ -28,10 +28,10 @@ spec:
         secretKeyRef:
           key: DT_TOKEN
           name: otel-collector-secret
-    - name: DT_ENV_ID
+    - name: DT_ENV
       valueFrom:
         secretKeyRef:
-          key: DT_ENV_ID
+          key: DT_ENV
           name: otel-collector-secret
     - name: K8S_NODE_NAME
       valueFrom:
@@ -213,8 +213,7 @@ spec:
         tls:
           insecure: true
       otlphttp/dt:
-        endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
-        # endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
+        endpoint: "https://${DT_ENV}/api/v2/otlp"
         headers:
           Authorization: "Api-Token ${DT_TOKEN}"
       debug:
