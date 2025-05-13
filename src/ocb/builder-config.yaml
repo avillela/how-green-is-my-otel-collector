@@ -2,9 +2,9 @@
 # Go modules for Collector contrib: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib
 
 dist:
-  name: otelcol-kepler-benchmark
+  name: otelcol-dev
   description: OTel Collector benchmark for Kepler
-  output_path: ./_build/col
+  output_path: ./otelcol-dev
 
 
 receivers:
