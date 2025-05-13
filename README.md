@@ -262,6 +262,12 @@ Install kube-green
 ./src/scripts/06-install-kube-green.sh
 ```
 
+Apply the sleep info
+
+```bash
+kubectl apply -f src/k8s/10-sleep-info.yaml
+```
+
 ## Useful Commands
 
 ### Nukify

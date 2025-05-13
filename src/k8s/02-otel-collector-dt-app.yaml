@@ -162,8 +162,7 @@ spec:
         tls:
           insecure: true
       otlphttp/dt:
-        endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
-        # endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
+        endpoint: "https://${DT_ENV}/api/v2/otlp"
         headers:
           Authorization: "Api-Token ${DT_TOKEN}"
       debug:
