@@ -306,3 +306,4 @@ kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 * [green-reviews-tooling (repository on GitHub)](https://github.com/cncf-tags/green-reviews-tooling?tab=readme-ov-file)
 * [Observe & Resolve: KubeGreen (repository on GitHub)](https://github.com/Observe-Resolve/kubegreen/blob/master/deployment.sh)
 * [Kube-Green Project](https://kube-green.dev/docs/getting-started/)
+* [Daily Clean](https://github.com/AxaFrance/dailyclean)

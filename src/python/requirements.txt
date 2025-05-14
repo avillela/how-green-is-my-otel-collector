@@ -1,7 +1,9 @@
 ## Setting flask version to >3 per this: https://github.com/open-telemetry/opentelemetry.io/pull/4034#issuecomment-1962066146
-flask<3
-werkzeug<3
-requests==2.31.0
+# flask<3
+# werkzeug<3
+# requests==2.31.0
+flask==3.1.1
+requests==2.32.3
 
 prometheus_client==0.20.0
 

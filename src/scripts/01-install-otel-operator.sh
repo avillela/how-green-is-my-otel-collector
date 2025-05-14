@@ -13,4 +13,4 @@ echo "----- Let's take a 10-second nap while the cert-manager pods come up... --
 sleep 10
 
 echo "*********** Deploying the OpenTelemetry Operator ***********"
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.102.0/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.124.0/opentelemetry-operator.yaml
