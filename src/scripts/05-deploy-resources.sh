@@ -63,10 +63,10 @@ if [ "${SPLIT_COLLECTORS}" == "split" ]; then
     kubectl apply -f src/k8s/02-otel-collector${SUFFIX}-k8s.yaml
     kubectl apply -f src/k8s/02-otel-collector${SUFFIX}-app.yaml
 elif [ "${SPLIT_COLLECTORS}" == "nosplit" ]; then
-    printf "** Running sinlge OTel Collector:[%s] **\n" ${SPLIT_COLLECTORS}
+    printf "** Running single OTel Collector:[%s] **\n" ${SPLIT_COLLECTORS}
     kubectl apply -f src/k8s/02-otel-collector${SUFFIX}.yaml
 elif [ "${SPLIT_COLLECTORS}" == "nosplitocb" ]; then
-    printf "** Running sinlge OTel Collector:[%s] **\n" ${SPLIT_COLLECTORS}
+    printf "** Running single OTel Collector:[%s] **\n" ${SPLIT_COLLECTORS}
     kubectl apply -f src/k8s/02-otel-collector${SUFFIX}-ocb.yaml
 else
     echo "INVALID OPTION. Must be one of (split | nosplit | nosplitocb) Exiting."

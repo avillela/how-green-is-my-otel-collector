@@ -9,8 +9,6 @@ metadata:
     app.kubernetes.io/destination: oss-tools
 spec:
   mode: statefulset
-  # Using an older version of the DT Collector (based on an older Collector contrib version) 
-  # where Python auto-instrumentation and context propagation doesn't break
   image: otel/opentelemetry-collector-contrib:0.126.0
   serviceAccount: otelcontribcol
   targetAllocator:

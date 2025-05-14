@@ -307,3 +307,14 @@ kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 * [Observe & Resolve: KubeGreen (repository on GitHub)](https://github.com/Observe-Resolve/kubegreen/blob/master/deployment.sh)
 * [Kube-Green Project](https://kube-green.dev/docs/getting-started/)
 * [Daily Clean](https://github.com/AxaFrance/dailyclean)
+* [Sustainability Workshop](https://github.com/henrikrexed/Sustainability-workshop)
+* [Observe & Resolve: Kepler Metrics](https://github.com/Observe-Resolve/observeresolve-keplermetric)
+* [OTel Collector internal telemetry](https://opentelemetry.io/docs/collector/internal-telemetry/)
+* [Ultimate Guide to Observing Your OpenTelemetry Collector](https://isitobservable.io/open-telemetry/ultimate-guide-to-observing-your-opentelemetry-collector)
+* [OTel Collector Cookbook](https://github.com/jpkrohling/otelcol-cookbook)
+
+
+## Notes
+
+* Need [metrics server](https://github.com/kubernetes-sigs/metrics-server) installed on k8s, because autoscaler was missing info.
+* Some o11y backends drop `otelcol_process_memory_rss` and instead use `otelcol_process_memory_rss_bytes` when emitting Collector metrics directly to o11y backend and not back to itself
