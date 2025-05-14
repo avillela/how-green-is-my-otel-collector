@@ -317,4 +317,6 @@ kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 ## Notes
 
 * Need [metrics server](https://github.com/kubernetes-sigs/metrics-server) installed on k8s, because autoscaler was missing info.
+* Autoscale CPU and Memory values are %
+* If autoscaler isn't working, check `HorizontalPodAutoscaler` resource in k8s (created by the OTel Operator)
 * Some o11y backends drop `otelcol_process_memory_rss` and instead use `otelcol_process_memory_rss_bytes` when emitting Collector metrics directly to o11y backend and not back to itself
