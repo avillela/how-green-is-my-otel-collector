@@ -36,16 +36,20 @@ Follow the instructions [here](/src/pulumi/gke-cluster/README.md). This will cre
 If you're feeling less adventurous feel free to use the gcloud CLI:
 
 ```bash
+# gcloud projects list
 PROJECT_NAME=<your_project_name>
 gcloud auth login
 gcloud config set project ${PROJECT_NAME}$
 
-# Create GKE cluster
+# gcloud compute zones list
 ZONE=<your_gcp_zone>
 NAME=gke-kepler
+MACHINE_TYPE=<your_machine_type>
+
+# Create GKE cluster
 gcloud container clusters create "${NAME}" \
   --zone ${ZONE} \
-  --machine-type=n1-standard-4 \
+  --machine-type=${MACHINE_TYPE} \
   --num-nodes=1
 ```
 
