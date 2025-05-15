@@ -30,10 +30,11 @@ DISK_TYPE = config.get("disk_type")
 DISK_SIZE_GB = config.get("disk_size_gb")
 
 # Note: if you get an error re: unsupported GKE version, try specifying a different zone
-ENGINE_VERSION = get_engine_versions().latest_master_version
+ENGINE_VERSION = get_engine_versions().default_cluster_version
 CLUSTER_NAME = config.get("cluster_name")
 NODE_POOL_NAME = f"{CLUSTER_NAME}-node-pool"
 
+print(f'Creating k8s GKE cluster version {ENGINE_VERSION}')
 
 # Now, actually create the GKE cluster.
 k8s_cluster = Cluster(

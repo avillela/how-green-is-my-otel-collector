@@ -126,8 +126,8 @@ For more information, check out the [Kepler installation documentation](https://
 Run the script:
 
 ```bash
-./src/scripts/02-install-kepler.sh
 ./src/scripts/03-install-podmonitor-svcmonitor.sh
+./src/scripts/02-install-kepler.sh
 ```
 
 #### Install Option 2 - With Prometheus

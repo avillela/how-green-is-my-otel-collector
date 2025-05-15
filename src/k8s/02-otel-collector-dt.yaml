@@ -10,14 +10,21 @@ metadata:
     app.kubernetes.io/benchmark-test: otelcol-contrib
 spec:
   mode: statefulset
+  image: otel/opentelemetry-collector-contrib:0.126.0
+  imagePullPolicy: Always
+  serviceAccount: otelcontribcol
   autoscaler:
     minReplicas: 1
     maxReplicas: 2
     targetCPUUtilization: 50
     targetMemoryUtilization: 60
-  image: otel/opentelemetry-collector-contrib:0.126.0
-  imagePullPolicy: Always
-  serviceAccount: otelcontribcol
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
