@@ -38,10 +38,10 @@ spec:
         secretKeyRef:
           key: DT_TOKEN
           name: otel-collector-secret
-    - name: DT_ENV_ID
+    - name: DT_ENV
       valueFrom:
         secretKeyRef:
-          key: DT_ENV_ID
+          key: DT_ENV
           name: otel-collector-secret
     - name: K8S_NODE_NAME
       valueFrom:
