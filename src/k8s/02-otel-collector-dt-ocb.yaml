@@ -61,12 +61,14 @@ spec:
 
       prometheus:
         config:
-          scrape_configs:
-            # Collector metrics
-            - job_name: 'otel-collector'
-              scrape_interval: 10s
-              static_configs:
-              - targets: [ '0.0.0.0:8888' ]
+          scrape_configs: []
+            ## NOTE: Scrape configs for the collector aren't needed if you're sending internal Collector telemetry direclty 
+            ## to an o11y backend
+            # # Collector metrics
+            # - job_name: 'otel-collector'
+            #   scrape_interval: 10s
+            #   static_configs:
+            #   - targets: [ '0.0.0.0:8888' ]
 
       # Logs - Pull k8s objects at given interval, and produce logs
       k8sobjects:
@@ -258,16 +260,18 @@ spec:
           exporters: [ otlphttp/dt, debug ]
 
       telemetry:
-        metrics:
-          level: detailed
-          readers:
-          - periodic:
-              exporter:
-                otlp:
-                  endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
-                  # endpoint: https://${DT_ENV}/api/v2/otlp
-                  # headers:
-                  #   Authorization: "Api-Token ${DT_TOKEN}"
-                  protocol: http/protobuf
-              interval: 10000
-              timeout: 5000
+          metrics:
+            level: detailed
+            readers:
+              - periodic:
+                  interval: 1000
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      temporality_preference: delta
+                      # endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
+                      # Workaround to get temporality_preference config to get picked up: https://github.com/open-telemetry/opentelemetry-collector/issues/13080
+                      endpoint: https://${DT_ENV}/api/v2/otlp/v1/metrics
+                      headers:
+                        - name: Authorization
+                          value: "Api-Token ${DT_TOKEN}"

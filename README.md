@@ -317,11 +317,4 @@ kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 * [Ultimate Guide to Observing Your OpenTelemetry Collector](https://isitobservable.io/open-telemetry/ultimate-guide-to-observing-your-opentelemetry-collector)
 * [OTel Collector Cookbook](https://github.com/jpkrohling/otelcol-cookbook)
 * [OTel Collector Config API reference](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/examples/sdk-config.yaml#L157)
-
-
-## Notes
-
-* Need [metrics server](https://github.com/kubernetes-sigs/metrics-server) installed on k8s, because autoscaler was missing info.
-* Autoscale CPU and Memory values are %
-* If autoscaler isn't working, check `HorizontalPodAutoscaler` resource in k8s (created by the OTel Operator)
-* Some o11y backends drop `otelcol_process_memory_rss` and instead use `otelcol_process_memory_rss_bytes` when emitting Collector metrics directly to o11y backend and not back to itself
+* [Workaround for getting `temporality_preference` config to get picked up in internal Collector telemetry (metrics)](https://github.com/open-telemetry/opentelemetry-collector/issues/13080)
