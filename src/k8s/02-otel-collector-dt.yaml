@@ -257,16 +257,17 @@ spec:
           exporters: [ otlphttp/dt, debug ]
 
       telemetry:
-        metrics:
-          level: detailed
-          readers:
-          - periodic:
-              exporter:
-                otlp:
-                  endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
-                  # endpoint: https://${DT_ENV}/api/v2/otlp
-                  # headers:
-                  #   Authorization: "Api-Token ${DT_TOKEN}"
-                  protocol: http/protobuf
-              interval: 10000
-              timeout: 5000
+          metrics:
+            level: detailed
+            readers:
+              - periodic:
+                  interval: 1000
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      temporality_preference: delta
+                      # endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
+                      endpoint: https://${DT_ENV}/api/v2/otlp/v1/metrics
+                      headers:
+                        - name: Authorization
+                          value: "Api-Token ${DT_TOKEN}"

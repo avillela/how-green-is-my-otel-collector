@@ -316,6 +316,7 @@ kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 * [OTel Collector internal telemetry](https://opentelemetry.io/docs/collector/internal-telemetry/)
 * [Ultimate Guide to Observing Your OpenTelemetry Collector](https://isitobservable.io/open-telemetry/ultimate-guide-to-observing-your-opentelemetry-collector)
 * [OTel Collector Cookbook](https://github.com/jpkrohling/otelcol-cookbook)
+* [OTel Collector Config API reference](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/examples/sdk-config.yaml#L157)
 
 
 ## Notes
