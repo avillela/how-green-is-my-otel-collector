@@ -27,6 +27,6 @@ helm install kepler kepler/kepler \
     --set extraEnvVars.ENABLE_PROCESS_METRICS="true" \
     --version "0.5.13"
 
-# Install modified PodMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Prometheus Receiver config
+# Install modified ServiceMonitor. This way, we don't have to do Kepler scrape configs in the Collector's Prometheus Receiver config
 kubectl wait pod --namespace kepler -l "app.kubernetes.io/name=kepler" --for=condition=Ready --timeout=2m
 kubectl apply -f src/k8s/00-kepler-servicemonitor.yaml

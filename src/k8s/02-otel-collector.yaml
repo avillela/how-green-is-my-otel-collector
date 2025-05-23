@@ -9,10 +9,21 @@ metadata:
     app.kubernetes.io/destination: oss-tools
 spec:
   mode: statefulset
-  # Using an older version of the DT Collector (based on an older Collector contrib version) 
-  # where Python auto-instrumentation and context propagation doesn't break
-  image: otel/opentelemetry-collector-contrib:0.102.1
+  image: otel/opentelemetry-collector-contrib:0.126.0
+  imagePullPolicy: Always
   serviceAccount: otelcontribcol
+  autoscaler:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilization: 50
+    targetMemoryUtilization: 60
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
@@ -156,3 +167,15 @@ spec:
           receivers: [ prometheus, k8s_cluster, kubeletstats ]
           processors: [ memory_limiter, transform/metrics, k8sattributes/k8s, batch ]
           exporters: [ debug ]
+
+      telemetry:
+        metrics:
+          level: detailed
+          readers:
+          - periodic:
+              exporter:
+                otlp:
+                  endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
+                  protocol: http/protobuf
+              interval: 10000
+              timeout: 5000

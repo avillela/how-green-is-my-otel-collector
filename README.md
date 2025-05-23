@@ -2,6 +2,10 @@
 
 This is the accompanying repository for the "How Green is My OTel Collector?" KubeCon EU 2025 talk by Adriana Villela and Nancy Chauhan.
 
+You can view the video on YouTube:
+
+[![img_tag](images/kubecon-eu-talk-2025-thumbnail.png)](https://youtu.be/ea2CKLX5vEs?si=ajmH6sGf4zeKY4ZV)
+
 This repository comes with a [Development (Dev) Container](https://containers.dev) [configuration file](.devcontainer/devcontainer.json), so that you can run the code locally using a Dev Container (e.g. via the [VSCode Dev Container plugn](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)), or on [GitHub Codespaces](https://code.visualstudio.com/docs/remote/codespaces).
 
 The Dev Container configuration includes everything that you need in order to run this example:
@@ -32,16 +36,20 @@ Follow the instructions [here](/src/pulumi/gke-cluster/README.md). This will cre
 If you're feeling less adventurous feel free to use the gcloud CLI:
 
 ```bash
+# gcloud projects list
 PROJECT_NAME=<your_project_name>
 gcloud auth login
 gcloud config set project ${PROJECT_NAME}$
 
-# Create GKE cluster
+# gcloud compute zones list
 ZONE=<your_gcp_zone>
 NAME=gke-kepler
+MACHINE_TYPE=<your_machine_type>
+
+# Create GKE cluster
 gcloud container clusters create "${NAME}" \
   --zone ${ZONE} \
-  --machine-type=n1-standard-4 \
+  --machine-type=${MACHINE_TYPE} \
   --num-nodes=1
 ```
 
@@ -122,8 +130,8 @@ For more information, check out the [Kepler installation documentation](https://
 Run the script:
 
 ```bash
-./src/scripts/02-install-kepler.sh
 ./src/scripts/03-install-podmonitor-svcmonitor.sh
+./src/scripts/02-install-kepler.sh
 ```
 
 #### Install Option 2 - With Prometheus
@@ -192,7 +200,7 @@ GH_USERNAME="<your_github_username>"
 ./src/scripts/04-build-and-publish-images.sh $GH_TOKEN $GH_USERNAME
 ```
 
-### 5- Deploy the Kubernetes
+### 5- Deploy to Kubernetes
 
 This will deploy the exmaple Python code (client and server app), plus a Python app that emits Prometheus-style metrics. It will also deploy an `OpenTelemetryCollector` resource, which deploys an OpenTelmetry Collector and Target Allocator.
 
@@ -250,6 +258,19 @@ Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power co
 
 ![Grafana Kepler Dashboard](/images/grafana-dashboard-kepler.png)
 
+### 6- Deploy kube-green
+
+Install kube-green
+
+```bash
+./src/scripts/06-install-kube-green.sh
+```
+
+Apply the sleep info
+
+```bash
+kubectl apply -f src/k8s/10-sleep-info.yaml
+```
 
 ## Useful Commands
 
@@ -278,3 +299,22 @@ List metrics (mostly):
 ```bash
 kubectl logs otelcol-collector-0 -n opentelemetry | grep "Name:" | sort | uniq
 ```
+
+## Resources & References
+
+* [Engineers often need a lot of water to keep data centers cool](https://www.asce.org/publications-and-news/civil-engineering-source/civil-engineering-magazine/issues/magazine-issue/article/2024/03/engineers-often-need-a-lot-of-water-to-keep-data-centers-cool)
+* [kube-green (article on Medium)](https://medium.com/@rahul.mam/kube-green-c04358881a2f)
+* [Kube-green: An operator to reduce CO2 footprint of your kubernetes clusters (article on Medium)](https://purushothamkdr453.medium.com/kube-green-an-operator-to-reduce-co2-footprint-of-your-clusters-b09643eb9ed2)
+* [Keeping the Cloud Green with the kube-green Operator on OpenShift](https://www.redhat.com/en/blog/keeping-the-cloud-green-with-the-kube-green-operator-on-openshift)
+* [Green Reviews Working Group: Moving towards measuring the sustainability footprint of CNCF projects](https://tag-env-sustainability.cncf.io/blog/2024-green-reviews-working-group-measuring-sustainability/)
+* [green-reviews-tooling (repository on GitHub)](https://github.com/cncf-tags/green-reviews-tooling?tab=readme-ov-file)
+* [Observe & Resolve: KubeGreen (repository on GitHub)](https://github.com/Observe-Resolve/kubegreen/blob/master/deployment.sh)
+* [Kube-Green Project](https://kube-green.dev/docs/getting-started/)
+* [Daily Clean](https://github.com/AxaFrance/dailyclean)
+* [Sustainability Workshop](https://github.com/henrikrexed/Sustainability-workshop)
+* [Observe & Resolve: Kepler Metrics](https://github.com/Observe-Resolve/observeresolve-keplermetric)
+* [OTel Collector internal telemetry](https://opentelemetry.io/docs/collector/internal-telemetry/)
+* [Ultimate Guide to Observing Your OpenTelemetry Collector](https://isitobservable.io/open-telemetry/ultimate-guide-to-observing-your-opentelemetry-collector)
+* [OTel Collector Cookbook](https://github.com/jpkrohling/otelcol-cookbook)
+* [OTel Collector Config API reference](https://github.com/open-telemetry/opentelemetry-configuration/blob/main/examples/sdk-config.yaml#L157)
+* [Workaround for getting `temporality_preference` config to get picked up in internal Collector telemetry (metrics)](https://github.com/open-telemetry/opentelemetry-collector/issues/13080)

@@ -10,3 +10,5 @@ pyenv.cfg
 *secret*
 *scratchpad*
 otelcol-kepler-benchmark/
+otelcol-dev/
+src/ocb/ocb

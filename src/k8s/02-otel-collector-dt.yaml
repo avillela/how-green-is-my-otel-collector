@@ -10,11 +10,21 @@ metadata:
     app.kubernetes.io/benchmark-test: otelcol-contrib
 spec:
   mode: statefulset
-  # Using an older version of the DT Collector (based on an older Collector contrib version) 
-  # where Python auto-instrumentation and context propagation doesn't break
-  image: otel/opentelemetry-collector-contrib:0.102.1
+  image: otel/opentelemetry-collector-contrib:0.126.0
   imagePullPolicy: Always
   serviceAccount: otelcontribcol
+  autoscaler:
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilization: 50
+    targetMemoryUtilization: 60
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
@@ -28,10 +38,10 @@ spec:
         secretKeyRef:
           key: DT_TOKEN
           name: otel-collector-secret
-    - name: DT_ENV_ID
+    - name: DT_ENV
       valueFrom:
         secretKeyRef:
-          key: DT_ENV_ID
+          key: DT_ENV
           name: otel-collector-secret
     - name: K8S_NODE_NAME
       valueFrom:
@@ -50,12 +60,14 @@ spec:
 
       prometheus:
         config:
-          scrape_configs:
-            # Collector metrics
-            - job_name: 'otel-collector'
-              scrape_interval: 10s
-              static_configs:
-              - targets: [ '0.0.0.0:8888' ]
+          scrape_configs: []
+            ## NOTE: Scrape configs for the collector aren't needed if you're sending internal Collector telemetry direclty 
+            ## to an o11y backend
+            # # Collector metrics
+            # - job_name: 'otel-collector'
+            #   scrape_interval: 10s
+            #   static_configs:
+            #   - targets: [ '0.0.0.0:8888' ]
 
       # Logs - Pull k8s objects at given interval, and produce logs
       k8sobjects:
@@ -213,8 +225,7 @@ spec:
         tls:
           insecure: true
       otlphttp/dt:
-        endpoint: "https://${DT_ENV_ID}.live.dynatrace.com/api/v2/otlp"
-        # endpoint: "https://${DT_ENV_ID}.dev.dynatracelabs.com/api/v2/otlp"
+        endpoint: "https://${DT_ENV}/api/v2/otlp"
         headers:
           Authorization: "Api-Token ${DT_TOKEN}"
       debug:
@@ -246,3 +257,20 @@ spec:
           receivers: [ k8sobjects ]
           processors: [ memory_limiter, transform/k8s, k8sattributes/k8s, resource, batch ]
           exporters: [ otlphttp/dt, debug ]
+
+      telemetry:
+          metrics:
+            level: detailed
+            readers:
+              - periodic:
+                  interval: 1000
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      temporality_preference: delta
+                      # endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
+                      # Workaround to get temporality_preference config to get picked up: https://github.com/open-telemetry/opentelemetry-collector/issues/13080
+                      endpoint: https://${DT_ENV}/api/v2/otlp/v1/metrics
+                      headers:
+                        - name: Authorization
+                          value: "Api-Token ${DT_TOKEN}"
