@@ -47,6 +47,14 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
+    - name: K8S_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: K8S_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
     # This ain't pretty, but it will do for now
     - name: CLUSTERNAME
       value: "gke-kepler"
@@ -98,7 +106,10 @@ spec:
       # Required for Dynatrace metrics processing
       # Ref: https://docs.dynatrace.com/docs/ingest-from/opentelemetry/collector/configuration#delta-metrics
       cumulativetodelta: {}
-      batch: {}
+      batch:
+        send_batch_max_size: 1000
+        timeout: 30s
+        send_batch_size : 800
 
       # Prevent out of memory (OOM) situations on the Collector
       memory_limiter:
@@ -259,18 +270,45 @@ spec:
           exporters: [ otlphttp/dt, debug ]
 
       telemetry:
-          metrics:
-            level: detailed
-            readers:
-              - periodic:
-                  interval: 1000
-                  exporter:
-                    otlp:
-                      protocol: http/protobuf
-                      temporality_preference: delta
-                      # endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
-                      # Workaround to get temporality_preference config to get picked up: https://github.com/open-telemetry/opentelemetry-collector/issues/13080
-                      endpoint: https://${DT_ENV}/api/v2/otlp/v1/metrics
-                      headers:
-                        - name: Authorization
-                          value: "Api-Token ${DT_TOKEN}"
+        resource:
+          k8s.namespace.name: "${env:K8S_POD_NAMESPACE}"
+          k8s.pod.name: "${env:K8S_POD_NAME}"
+          k8s.node.name: "${env:K8S_NODE_NAME}"
+
+        metrics:
+          level: detailed
+          readers:
+            - periodic:
+                # interval: 1000
+                exporter:
+                  otlp:
+                    protocol: http/protobuf
+                    temporality_preference: delta
+                    # endpoint: http://otelcol-collector.opentelemetry.svc.cluster.local:4318
+                    # Workaround to get temporality_preference config to get picked up: https://github.com/open-telemetry/opentelemetry-collector/issues/13080
+                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/metrics
+                    headers:
+                      - name: Authorization
+                        value: "Api-Token ${DT_TOKEN}"
+        logs:
+          level: info
+          output_paths: ["stdout"]
+          processors:
+            - batch:
+                exporter:
+                  otlp:
+                    protocol: http/protobuf
+                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/logs
+                    headers:
+                      - name: Authorization
+                        value: "Api-Token ${DT_TOKEN}"
+        traces:
+          processors:
+            - batch:
+                exporter:
+                  otlp:
+                    protocol: http/protobuf
+                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/traces
+                    headers:
+                      - name: Authorization
+                        value: "Api-Token ${DT_TOKEN}"
