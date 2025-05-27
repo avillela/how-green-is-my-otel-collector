@@ -260,7 +260,7 @@ Next, select `otelcol-collector-0` from the `Pod` dropdown, to view the power co
 
 ### 6- Deploy kube-green
 
-Install kube-green
+Install kube-green. Keep in mind that since we're managing our Collector via the OTel Operator, Kube-Green will NOT sleep any Collector pods; it will only sleep application pods.
 
 ```bash
 ./src/scripts/06-install-kube-green.sh
@@ -271,6 +271,8 @@ Apply the sleep info
 ```bash
 kubectl apply -f src/k8s/10-sleep-info.yaml
 ```
+
+> **NOTE:** You'll need to update the sleep start/end times, and time zone, as it applies to your own.
 
 ## Useful Commands
 
