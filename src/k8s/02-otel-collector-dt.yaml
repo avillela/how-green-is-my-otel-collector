@@ -15,16 +15,16 @@ spec:
   serviceAccount: otelcontribcol
   autoscaler:
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 3
     targetCPUUtilization: 50
     targetMemoryUtilization: 60
   resources:
     limits:
       cpu: 100m
-      memory: 128Mi
+      memory: 256Mi
     requests:
       cpu: 100m
-      memory: 64Mi
+      memory: 128Mi
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
@@ -112,10 +112,11 @@ spec:
         send_batch_size : 800
 
       # Prevent out of memory (OOM) situations on the Collector
+      # https://github.com/open-telemetry/opentelemetry-collector/issues/9043#issuecomment-1863637337
       memory_limiter:
         check_interval: 1s
-        limit_percentage: 70
-        spike_limit_percentage: 30
+        limit_percentage: 75
+        spike_limit_percentage: 15
 
       # Modifies telemetry based on configuration using the OpenTelemetry Transformation Language (OTTL)
       # This particular transform processor configuration k8s attributes to Dynatrace attributes
@@ -293,6 +294,7 @@ spec:
         logs:
           level: info
           output_paths: ["stdout"]
+          error_output_paths: ["stderr"]
           processors:
             - batch:
                 exporter:
