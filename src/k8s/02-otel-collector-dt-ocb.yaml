@@ -22,10 +22,10 @@ spec:
   resources:
     limits:
       cpu: 100m
-      memory: 128Mi
+      memory: 256Mi
     requests:
       cpu: 100m
-      memory: 64Mi
+      memory: 128Mi
   targetAllocator:
     enabled: true
     serviceAccount: opentelemetry-targetallocator-sa
@@ -116,8 +116,8 @@ spec:
       # Prevent out of memory (OOM) situations on the Collector
       memory_limiter:
         check_interval: 1s
-        limit_percentage: 70
-        spike_limit_percentage: 30
+        limit_percentage: 75
+        spike_limit_percentage: 15
 
       # Modifies telemetry based on configuration using the OpenTelemetry Transformation Language (OTTL)
       # This particular transform processor configuration k8s attributes to Dynatrace attributes
@@ -292,25 +292,26 @@ spec:
                     headers:
                       - name: Authorization
                         value: "Api-Token ${DT_TOKEN}"
-        logs:
-          level: debug
-          output_paths: ["stdout"]
-          processors:
-            - batch:
-                exporter:
-                  otlp:
-                    protocol: http/protobuf
-                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/logs
-                    headers:
-                      - name: Authorization
-                        value: "Api-Token ${DT_TOKEN}"
-        traces:
-          processors:
-            - batch:
-                exporter:
-                  otlp:
-                    protocol: http/protobuf
-                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/traces
-                    headers:
-                      - name: Authorization
-                        value: "Api-Token ${DT_TOKEN}"
+        # logs:
+        #   level: info
+        #   output_paths: ["stdout"]
+        #   error_output_paths: ["stderr"]
+        #   processors:
+        #     - batch:
+        #         exporter:
+        #           otlp:
+        #             protocol: http/protobuf
+        #             endpoint: https://${DT_ENV}/api/v2/otlp/v1/logs
+        #             headers:
+        #               - name: Authorization
+        #                 value: "Api-Token ${DT_TOKEN}"
+        # traces:
+        #   processors:
+        #     - batch:
+        #         exporter:
+        #           otlp:
+        #             protocol: http/protobuf
+        #             endpoint: https://${DT_ENV}/api/v2/otlp/v1/traces
+        #             headers:
+        #               - name: Authorization
+        #                 value: "Api-Token ${DT_TOKEN}"

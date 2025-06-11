@@ -59,7 +59,8 @@ k8s_cluster = Cluster(
             "https://www.googleapis.com/auth/cloud-platform",
         ],
     ),
-    logging_service=None
+    logging_service=None,
+    monitoring_service=None
 )
 
 # Manufacture a GKE-style Kubeconfig. Note that this is slightly "different" because of the way GKE requires

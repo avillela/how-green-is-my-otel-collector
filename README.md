@@ -50,7 +50,8 @@ MACHINE_TYPE=<your_machine_type>
 gcloud container clusters create "${NAME}" \
   --zone ${ZONE} \
   --machine-type=${MACHINE_TYPE} \
-  --num-nodes=1
+  --num-nodes=1 \
+  --monitoring=NONE --logging=NONE
 ```
 
 #### AWS cloud Instructions : 
