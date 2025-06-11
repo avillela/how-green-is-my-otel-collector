@@ -226,26 +226,26 @@ spec:
                     headers:
                       - name: Authorization
                         value: "Api-Token ${DT_TOKEN}"
-        logs:
-          level: info
-          output_paths: ["stdout"]
-          error_output_paths: ["stderr"]
-          processors:
-            - batch:
-                exporter:
-                  otlp:
-                    protocol: http/protobuf
-                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/logs
-                    headers:
-                      - name: Authorization
-                        value: "Api-Token ${DT_TOKEN}"
-        traces:
-          processors:
-            - batch:
-                exporter:
-                  otlp:
-                    protocol: http/protobuf
-                    endpoint: https://${DT_ENV}/api/v2/otlp/v1/traces
-                    headers:
-                      - name: Authorization
-                        value: "Api-Token ${DT_TOKEN}"
+        # logs:
+        #   level: info
+        #   output_paths: ["stdout"]
+        #   error_output_paths: ["stderr"]
+        #   processors:
+        #     - batch:
+        #         exporter:
+        #           otlp:
+        #             protocol: http/protobuf
+        #             endpoint: https://${DT_ENV}/api/v2/otlp/v1/logs
+        #             headers:
+        #               - name: Authorization
+        #                 value: "Api-Token ${DT_TOKEN}"
+        # traces:
+        #   processors:
+        #     - batch:
+        #         exporter:
+        #           otlp:
+        #             protocol: http/protobuf
+        #             endpoint: https://${DT_ENV}/api/v2/otlp/v1/traces
+        #             headers:
+        #               - name: Authorization
+        #                 value: "Api-Token ${DT_TOKEN}"
